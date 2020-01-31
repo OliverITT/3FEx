@@ -2,14 +2,13 @@
 #include <pthread.h>
 #include <string.h>
 #include "features.h"
-#include <math.h>
 #include <inttypes.h>
-
+#include <math.h>
 
 FILE *raw, *csv, *ipts, *alertT;
 
 pthread_mutex_t mutex;
- 
+
 void mark(uint64_t point)
 {
     for (int i = 0; i < 4; i++)
@@ -26,188 +25,216 @@ void yield(void)
 
 void calculate_std_pktl()
 {
-        
-        double std_temp = 0;
-        for (it_std_fpktl = vector_std_fpktl.begin(); it_std_fpktl != vector_std_fpktl.end(); ++it_std_fpktl)
+
+    double std_temp = 0;
+    for (it_std_fpktl = vector_std_fpktl.begin(); it_std_fpktl != vector_std_fpktl.end(); ++it_std_fpktl)
+    {
+        *it_std_fpktl -= mean_fpktl;
+        *it_std_fpktl = pow(*it_std_fpktl, 2);
+    }
+    //
+    for (it_std_fpktl = vector_std_fpktl.begin(); it_std_fpktl != vector_std_fpktl.end(); ++it_std_fpktl)
+    {
+        std_temp += (*it_std_fpktl);
+    }
+    std_fpktl = sqrt((std_temp / (total_fpackets - 1)));
+    if (total_bpackets > 1)
+    {
+        std_temp = 0;
+        for (it_std_bpktl = vector_std_bpktl.begin(); it_std_bpktl != vector_std_bpktl.end(); ++it_std_bpktl)
         {
-                *it_std_fpktl -= mean_fpktl;
-                *it_std_fpktl = pow(*it_std_fpktl, 2);
+            *it_std_bpktl -= mean_bpktl;
+            *it_std_bpktl = pow(*it_std_bpktl, 2);
         }
         //
-        for (it_std_fpktl = vector_std_fpktl.begin(); it_std_fpktl != vector_std_fpktl.end(); ++it_std_fpktl)
+        for (it_std_bpktl = vector_std_bpktl.begin(); it_std_bpktl != vector_std_bpktl.end(); ++it_std_bpktl)
         {
-                std_temp += (*it_std_fpktl);
+            std_temp += (*it_std_bpktl);
         }
-        std_fpktl = sqrt((std_temp / (total_fpackets - 1)));
-        if (total_bpackets>1)
-        {
-                std_temp = 0;
-                for (it_std_bpktl = vector_std_bpktl.begin(); it_std_bpktl != vector_std_bpktl.end(); ++it_std_bpktl)
-                {
-                        *it_std_bpktl -= mean_bpktl;
-                        *it_std_bpktl = pow(*it_std_bpktl, 2);
-                }
-                //
-                for (it_std_bpktl = vector_std_bpktl.begin(); it_std_bpktl != vector_std_bpktl.end(); ++it_std_bpktl)
-                {
-                        std_temp += (*it_std_bpktl);
-                }
-                std_bpktl = sqrt((std_temp / (total_bpackets - 1)));
-        }
+        std_bpktl = sqrt((std_temp / (total_bpackets - 1)));
+    }
 }
-void calculate_std_iat(){
-    double temp_std_iat=0;
-    for (it_std_fiat = vector_std_fiat.begin();it_std_fiat != vector_std_fiat.end();++it_std_fiat)
+void calculate_std_iat()
+{
+    double temp_std_iat = 0;
+    for (it_std_fiat = vector_std_fiat.begin(); it_std_fiat != vector_std_fiat.end(); ++it_std_fiat)
     {
         *it_std_fiat -= mean_fiat;
-        *it_std_fiat = pow(*it_std_fiat,2);
+        *it_std_fiat = pow(*it_std_fiat, 2);
     }
-    for (it_std_fiat = vector_std_fiat.begin();it_std_fiat != vector_std_fiat.end();++it_std_fiat)
+    for (it_std_fiat = vector_std_fiat.begin(); it_std_fiat != vector_std_fiat.end(); ++it_std_fiat)
     {
-        temp_std_iat +=  *it_std_fiat;
+        temp_std_iat += *it_std_fiat;
     }
-    std_fiat = sqrt(temp_std_iat/(vector_std_fiat.size()-1));
-    temp_std_iat =0;
-   if(total_bpackets>1){
-        for (it_std_biat = vector_std_biat.begin();it_std_biat != vector_std_biat.end();++it_std_biat)
+    std_fiat = sqrt(temp_std_iat / (vector_std_fiat.size() - 1));
+    temp_std_iat = 0;
+    if (total_bpackets > 1)
     {
-        *it_std_biat -= mean_biat;
-        *it_std_biat = pow(*it_std_biat,2);
+        for (it_std_biat = vector_std_biat.begin(); it_std_biat != vector_std_biat.end(); ++it_std_biat)
+        {
+            *it_std_biat -= mean_biat;
+            *it_std_biat = pow(*it_std_biat, 2);
+        }
+        for (it_std_biat = vector_std_biat.begin(); it_std_biat != vector_std_biat.end(); ++it_std_biat)
+        {
+            temp_std_iat += *it_std_biat;
+        }
+        std_biat = sqrt(temp_std_iat / (vector_std_biat.size() - 1));
     }
-    for (it_std_biat = vector_std_biat.begin();it_std_biat != vector_std_biat.end();++it_std_biat)
-    {
-        temp_std_iat +=  *it_std_biat;
-    }
-    std_biat = sqrt(temp_std_iat/(vector_std_biat.size()-1));
-   }
-    
 }
-void calculateFlagsFlow(){
-      
-    if((*(bffRawTrafic + jump + 63)&_PSH)){
+void calculateFlagsFlow()
+{
+
+    if ((*(bffRawTrafic + jump + 63) & _PSH))
+    {
         flow_psh++;
     }
-    if((*(bffRawTrafic + jump + 63)&_URG)){
+    if ((*(bffRawTrafic + jump + 63) & _URG))
+    {
         flow_urg++;
     }
-    if((*(bffRawTrafic + jump + 63)&_FIN)){
-      flow_fin++;
+    if ((*(bffRawTrafic + jump + 63) & _FIN))
+    {
+        flow_fin++;
     }
-    if((*(bffRawTrafic + jump + 63)&_SYN)){
+    if ((*(bffRawTrafic + jump + 63) & _SYN))
+    {
         flow_syn++;
     }
-    if((*(bffRawTrafic + jump + 63)&_RST)){
+    if ((*(bffRawTrafic + jump + 63) & _RST))
+    {
         flow_rst++;
     }
-    if((*(bffRawTrafic + jump + 63)&_ACK)){
+    if ((*(bffRawTrafic + jump + 63) & _ACK))
+    {
         flow_ack++;
     }
-    if((*(bffRawTrafic + jump + 63)&_CWE)){
+    if ((*(bffRawTrafic + jump + 63) & _CWE))
+    {
         flow_cwr++;
     }
-    if((*(bffRawTrafic + jump + 63)&_ECE)){
+    if ((*(bffRawTrafic + jump + 63) & _ECE))
+    {
         flow_ece++;
     }
-    
 }
 //forward direction flags
-void calculateFlagsForward(){
-  
-    if((*(bffRawTrafic + jump + 63)&_PSH)){
+void calculateFlagsForward()
+{
+
+    if ((*(bffRawTrafic + jump + 63) & _PSH))
+    {
         fpsh_cnt++;
     }
-    if((*(bffRawTrafic + jump + 63)&_URG)){
+    if ((*(bffRawTrafic + jump + 63) & _URG))
+    {
         furg_cnt++;
     }
-   
 }
 //backward direction flags
-void calculateFlagsBackward(){
-  if((*(bffRawTrafic + jump + 63)&_PSH)){
+void calculateFlagsBackward()
+{
+    if ((*(bffRawTrafic + jump + 63) & _PSH))
+    {
         bpsh_cnt++;
     }
-    if((*(bffRawTrafic + jump + 63)&_URG)){
+    if ((*(bffRawTrafic + jump + 63) & _URG))
+    {
         burg_cnt++;
     }
-   
 }
 
-void calculateFlagsFlowv6(){
-      
-    if((*(bffRawTrafic + jump + 83)&_PSH)){
+void calculateFlagsFlowv6()
+{
+
+    if ((*(bffRawTrafic + jump + 83) & _PSH))
+    {
         flow_psh++;
     }
-    if((*(bffRawTrafic + jump + 83)&_URG)){
+    if ((*(bffRawTrafic + jump + 83) & _URG))
+    {
         flow_urg++;
     }
-    if((*(bffRawTrafic + jump + 83)&_FIN)){
-      flow_fin++;
+    if ((*(bffRawTrafic + jump + 83) & _FIN))
+    {
+        flow_fin++;
     }
-    if((*(bffRawTrafic + jump + 83)&_SYN)){
+    if ((*(bffRawTrafic + jump + 83) & _SYN))
+    {
         flow_syn++;
     }
-    if((*(bffRawTrafic + jump + 83)&_RST)){
+    if ((*(bffRawTrafic + jump + 83) & _RST))
+    {
         flow_rst++;
     }
-    if((*(bffRawTrafic + jump + 83)&_ACK)){
+    if ((*(bffRawTrafic + jump + 83) & _ACK))
+    {
         flow_ack++;
     }
-    if((*(bffRawTrafic + jump + 83)&_CWE)){
+    if ((*(bffRawTrafic + jump + 83) & _CWE))
+    {
         flow_cwr++;
     }
-    if((*(bffRawTrafic + jump + 83)&_ECE)){
+    if ((*(bffRawTrafic + jump + 83) & _ECE))
+    {
         flow_ece++;
     }
-    
 }
 //forward direction flags
-void calculateFlagsForwardv6(){
-  
-    if((*(bffRawTrafic + jump + 83)&_PSH)){
+void calculateFlagsForwardv6()
+{
+
+    if ((*(bffRawTrafic + jump + 83) & _PSH))
+    {
         fpsh_cnt++;
     }
-    if((*(bffRawTrafic + jump + 83)&_URG)){
+    if ((*(bffRawTrafic + jump + 83) & _URG))
+    {
         furg_cnt++;
     }
-   
 }
 //backward direction flags
-void calculateFlagsBackwardv6(){
-  if((*(bffRawTrafic + jump + 83)&_PSH)){
+void calculateFlagsBackwardv6()
+{
+    if ((*(bffRawTrafic + jump + 83) & _PSH))
+    {
         bpsh_cnt++;
     }
-    if((*(bffRawTrafic + jump + 83)&_URG)){
+    if ((*(bffRawTrafic + jump + 83) & _URG))
+    {
         burg_cnt++;
     }
-   
 }
 
-void calculate_std_flowpktl(){
+void calculate_std_flowpktl()
+{
     //vector_std_flowpktl
-    double temp_std_=0;
-    for (it_std_flowpktl = vector_std_flowpktl.begin();it_std_flowpktl != vector_std_flowpktl.end();++it_std_flowpktl)
+    double temp_std_ = 0;
+    for (it_std_flowpktl = vector_std_flowpktl.begin(); it_std_flowpktl != vector_std_flowpktl.end(); ++it_std_flowpktl)
     {
         *it_std_flowpktl -= mean_flowpktl;
-        *it_std_flowpktl = pow(*it_std_flowpktl,2);
+        *it_std_flowpktl = pow(*it_std_flowpktl, 2);
     }
-    for (it_std_flowpktl = vector_std_flowpktl.begin();it_std_flowpktl != vector_std_flowpktl.end();++it_std_flowpktl)
+    for (it_std_flowpktl = vector_std_flowpktl.begin(); it_std_flowpktl != vector_std_flowpktl.end(); ++it_std_flowpktl)
     {
-        temp_std_ +=  *it_std_flowpktl;
+        temp_std_ += *it_std_flowpktl;
     }
-    std_flowpktl = sqrt(temp_std_/(vector_std_flowpktl.size()-1));
+    std_flowpktl = sqrt(temp_std_ / (vector_std_flowpktl.size() - 1));
 }
-void calculate_std_flowiat(){
+void calculate_std_flowiat()
+{
     std::vector<float>::iterator it_temp1;
-    double temp_std_=0;
-    for(it_temp1=vector_std_flowiat.begin();it_temp1 != vector_std_flowiat.end(); ++it_temp1){
+    double temp_std_ = 0;
+    for (it_temp1 = vector_std_flowiat.begin(); it_temp1 != vector_std_flowiat.end(); ++it_temp1)
+    {
         *it_temp1 -= mean_flowiat;
-        *it_temp1 = pow(*it_temp1,2);
+        *it_temp1 = pow(*it_temp1, 2);
     }
-    for(it_temp1=vector_std_flowiat.begin();it_temp1 != vector_std_flowiat.end(); ++it_temp1){
+    for (it_temp1 = vector_std_flowiat.begin(); it_temp1 != vector_std_flowiat.end(); ++it_temp1)
+    {
         temp_std_ += *it_temp1;
     }
-    std_flowiat =sqrt(temp_std_/(vector_std_flowiat.size()-1));
-
+    std_flowiat = sqrt(temp_std_ / (vector_std_flowiat.size() - 1));
 }
 void *scanFlowIpv4TCP(void *valor)
 {
@@ -215,139 +242,155 @@ void *scanFlowIpv4TCP(void *valor)
     pthread_mutex_lock(&mutex); //Inicio SC
     printf("hilo->%d\n", *(int *)valor);
     resetVar();
-    jump=0;
-   
+    jump = 0;
+
     while (true)
     {
         //printf("primer ciclo\n");
         while (true)
         {
-           //printf("segundo ciclo\n");
+            //printf("segundo ciclo\n");
 
             //verifica si ya se recorrio todo el archivo, si es asi limpia los contadores y jump = ultima posicion de primer paquete del flojo
-            if(jump >= pointerbffRawTrafic){ 
+            if (jump >= pointerbffRawTrafic)
+            {
                 //printf("\nTermino scaneo\n");
-                if(traficTipe==_TCP){
+                if (traficTipe == _TCP)
+                {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl=min_bpktl==65535?0:min_bpktl;
-                    mean_fpktl=total_fpktl/((float)total_fpackets);
-                    mean_bpktl= total_bpackets>0?(total_bpktl/((float)total_bpackets)):NAN;
-                    //min_biat = min_biat== 65536 ? 0 : min_biat;
+                    min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
+                    mean_fpktl = total_fpktl / ((float)total_fpackets);
+                    mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //
-                    mean_fiat= ((float)total_fiat)/(total_fpackets-1);
-                    mean_biat= total_bpackets>1?total_biat/(total_bpackets-1):NAN;
+                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_biat = total_bpackets > 1 ? min_biat : NAN;
                     //
-                    mean_flowpktl=(mean_flowpktl/(total_fpackets+total_bpackets));
+                    total_fiat = total_fpackets > 1 ? total_fiat : NAN;
+                    total_biat = total_bpackets > 1 ? total_biat : NAN;
+
                     //
-                    mean_flowiat = mean_flowiat/(total_fpackets+total_bpackets);
+                    mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
+                    mean_biat = total_bpackets > 0 ? total_biat / (total_bpackets - 1) : NAN;
+                    //
+                    max_fiat = total_fpackets > 1 ? max_fiat : NAN;
+                    max_biat = total_bpackets > 1 ? max_biat : NAN;
+                    //
+                    mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
+                    //
+                    mean_flowiat = mean_flowiat / (total_fpackets + total_bpackets);
                     //
                     calculate_std_pktl();
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    fprintf(csv, "TCP,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n", 
-                    ip_shost>>24,((ip_shost>>16)&0x0ff),((ip_shost>>8)&0x0ff),((ip_shost)&0x0ff),
-                    ip_dhost>>24,((ip_dhost>>16)&0x0ff),((ip_dhost>>8)&0x0ff),((ip_dhost)&0x0ff),
-                    ip_shost>>24,(ip_shost>>16)&0x0ff,(ip_shost>>8)&0x0ff,(ip_shost)&0x0ff,ports.srcPort,
-                    ip_dhost>>24,(ip_dhost>>16)&0x0ff,(ip_dhost>>8)&0x0ff,(ip_dhost)&0x0ff,ports.dstPort,
-                    timestampPrev-timestampInit,
-                    total_fpackets,
-                    total_bpackets,
-                    total_fpktl,
-                    total_bpktl,
-                    min_fpktl,
-                    min_bpktl,
-                    max_fpktl,
-                    max_bpktl,
-                    mean_fpktl,
-                    mean_bpktl,
-                    std_fpktl,
-                    std_bpktl,
-                    total_fiat,
-                    total_biat,
-                    min_fiat,
-                    min_biat,
-                    max_fiat,
-                    max_biat,
-                    mean_fiat,
-                    mean_biat,
-                    std_fiat,
-                    std_biat,
-                    fpsh_cnt,
-                    bpsh_cnt,
-                    furg_cnt,
-                    burg_cnt,
-                    (total_fpackets/(timestampPrev-timestampInit)),
-                    (total_bpackets/(timestampPrev-timestampInit)),
-                    ((total_fpackets+total_bpackets)/(timestampPrev-timestampInit)),
-                    ((total_fpktl+total_bpktl)/(timestampPrev-timestampInit)),
-                    min_flowpktl,
-                    max_flowpktl,
-                    mean_flowpktl,
-                    std_flowpktl,
-                    min_flowiat,
-                    max_flowiat,
-                    mean_flowiat,
-                    std_flowiat,
-                    flow_fin,
-                    flow_syn,
-                    flow_rst,
-                    flow_psh,
-                    flow_ack,
-                    flow_urg,
-                    flow_cwr,
-                    flow_ece
-                    );
+                    std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
+                    fprintf(csv, "TCP,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
+                            ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
+                            ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
+                            ip_shost >> 24, (ip_shost >> 16) & 0x0ff, (ip_shost >> 8) & 0x0ff, (ip_shost)&0x0ff, ports.srcPort,
+                            ip_dhost >> 24, (ip_dhost >> 16) & 0x0ff, (ip_dhost >> 8) & 0x0ff, (ip_dhost)&0x0ff, ports.dstPort,
+                            timestampPrev - timestampInit,
+                            total_fpackets,
+                            total_bpackets,
+                            total_fpktl,
+                            total_bpktl,
+                            min_fpktl,
+                            min_bpktl,
+                            max_fpktl,
+                            max_bpktl,
+                            mean_fpktl,
+                            mean_bpktl,
+                            std_fpktl,
+                            std_bpktl,
+                            total_fiat,
+                            total_biat,
+                            min_fiat,
+                            min_biat,
+                            max_fiat,
+                            max_biat,
+                            mean_fiat,
+                            mean_biat,
+                            std_fiat,
+                            std_biat,
+                            fpsh_cnt,
+                            bpsh_cnt,
+                            furg_cnt,
+                            burg_cnt,
+                            (total_fpackets / (timestampPrev - timestampInit)),
+                            (total_bpackets / (timestampPrev - timestampInit)),
+                            ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)),
+                            ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)),
+                            min_flowpktl,
+                            max_flowpktl,
+                            mean_flowpktl,
+                            std_flowpktl,
+                            min_flowiat,
+                            max_flowiat,
+                            mean_flowiat,
+                            std_flowiat,
+                            flow_fin,
+                            flow_syn,
+                            flow_rst,
+                            flow_psh,
+                            flow_ack,
+                            flow_urg,
+                            flow_cwr,
+                            flow_ece,
+                            (total_fpackets / (float)total_bpackets));
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
-                   //printf("Timestamp%f\n",timestampInit);
-                   //printf("Timestamp%f\n",timestampPrev);
-                   // printf("time sesion: %f\n",(timestampPrev-timestampInit));
+                    //printf("Timestamp%f\n",timestampInit);
+                    //printf("Timestamp%f\n",timestampPrev);
+                    // printf("time sesion: %f\n",(timestampPrev-timestampInit));
                 }
-                
-                if(traficTipe==0){
+
+                if (traficTipe == 0)
+                {
                     //fin de scaneo de trafico
                     //printf("\nfin del programa\n");
                     //printf("jump:%llu",jump);
-                    printf("fin del programa:%" PRId64 "\n",jump);
+                    printf("fin del programa:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
                 }
                 //limpiar varibles
                 resetVar();
-                if(traficPointer%1024==0){
-                    printf("Bytes procesados->%" PRId64  "\n",traficPointer);
+                if (traficPointer % 1024 == 0)
+                {
+                    printf("Bytes procesados->%" PRId64 "\n", traficPointer);
                 }
-                jump=traficPointer;
-                traficTipe=0;
-                }
+                jump = traficPointer;
+                traficTipe = 0;
+            }
             while (jump < pointerbffRawTrafic)
-            {   
-            //printf("miestras es menor");
+            {
+                //printf("miestras es menor");
 
                 //
                 incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                 timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
 
                 //busca paquetes distintos de cero
-                while (timestampTemp == 0||!((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV4)||!(*(bffRawTrafic + (jump + 39)) == _TCP))
+                while (timestampTemp == 0 || !((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV4) || !(*(bffRawTrafic + (jump + 39)) == _TCP))
                 {
-                    if(jump == pointerbffRawTrafic){
-                    break;}
+                    if (jump == pointerbffRawTrafic)
+                    {
+                        break;
+                    }
                     jump += incl_leng + 16;
-                    
+
                     incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                     timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
-                    
                 }
                 //check if ipv4
                 if ((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV4)
                 {
-                    
-                    if(!(*(bffRawTrafic + (jump + 39)) == _TCP) ){
+
+                    if (!(*(bffRawTrafic + (jump + 39)) == _TCP))
+                    {
                         jump += incl_leng + 16;
                         break;
                     }
@@ -356,7 +399,7 @@ void *scanFlowIpv4TCP(void *valor)
                         //calculateFlagsFlow();
                         traficTipe = *(bffRawTrafic + (jump + 39));
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                        timestampPrev = timestampInit = timestampTemp;
+                        timestampPrev = timestampPrevForward = timestampInit = timestampTemp;
                         //extraccion de ip y puertos
                         ip_shost = *(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45);
                         ip_dhost = *(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49);
@@ -367,8 +410,6 @@ void *scanFlowIpv4TCP(void *valor)
                         total_fpktl = incl_leng;
                         //
                         min_fpktl = incl_leng;
-                        //
-                        min_bpktl = incl_leng;
                         //
                         max_fpktl = incl_leng;
                         //
@@ -382,130 +423,149 @@ void *scanFlowIpv4TCP(void *valor)
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_fiat = timestampTemp;
-                        //
-                        min_biat = timestampTemp;
-                        //
-                        min_flowiat = timestampTemp;
+
                         //
                         calculateFlagsFlow();
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
                         jump += incl_leng + 16;
-                        traficPointer=jump;
+                        traficPointer = jump;
                         break;
                     }
+                    ip_shost_temp = *(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45);
+                    ip_dhost_temp = *(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49);
+                    ports_temp.srcPort = *(bffRawTrafic + jump + 50) << 8 | *(bffRawTrafic + jump + 51);
+                    ports_temp.dstPort = *(bffRawTrafic + jump + 52) << 8 | *(bffRawTrafic + jump + 53);
                     //timeout sesion
-                    if(timestampTemp-timestampPrev>100){
+                    if (timestampTemp - timestampPrev > 100)
+                    {
                         jump = pointerbffRawTrafic;
                         //printf("timeout\n");
                         break;
                     }
                     //check if the forward direction
-                    if (
-                    (ip_shost==(*(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45))
-                    &&(ip_dhost==(*(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49))))
-                    &&((ports.srcPort == (*(bffRawTrafic + jump + 50) << 8 | *(bffRawTrafic + jump + 51)))&&(ports.dstPort == (*(bffRawTrafic + jump + 52) << 8 | *(bffRawTrafic + jump + 53)))))
-                    {  
-                    
+                    if (ip_shost == ip_shost_temp && ip_dhost == ip_dhost_temp && ports.srcPort == ports_temp.srcPort && ports.dstPort == ports_temp.dstPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
                         //
-                        iptTemp=timestampTemp-timestampPrev;
+                        iptTemp = timestampTemp - timestampPrev;
                         //
-                        iptsCad+= std::to_string(iptTemp)+",";
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
+                        
+
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
                         total_fpktl += incl_leng;
                         //
-                        min_fpktl= incl_leng<min_fpktl?incl_leng:min_fpktl;
-                        max_fpktl= incl_leng>max_fpktl?incl_leng:max_fpktl;
+                        min_fpktl = incl_leng < min_fpktl ? incl_leng : min_fpktl;
+                        max_fpktl = incl_leng > max_fpktl ? incl_leng : max_fpktl;
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
+                        iptTemp = timestampTemp - timestampPrevForward;
+                        if (!iatForwardState)
+                        {
+                            min_fiat = iptTemp;
+                            min_flowiat = iptTemp;
+                        }
                         total_fiat += iptTemp;
                         //
-                        min_fiat = iptTemp<min_fiat? iptTemp :min_fiat;
+                        min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
                         //
-                        max_fiat = iptTemp>max_fiat? iptTemp :max_fiat;
+                        max_fiat = iptTemp > max_fiat ? iptTemp : max_fiat;
                         //
                         vector_std_fiat.push_back(iptTemp);
                         //
                         calculateFlagsForward();
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
                         //
+                        timestampPrevForward = timestampTemp;
+                        //
                         calculateFlagsFlow();
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
 
                     //check if the backward direction
-                   if (
-                    (ip_dhost==(*(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45))
-                    &&(ip_shost==(*(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49))))
-                    &&((ports.dstPort == (*(bffRawTrafic + jump + 50) << 8 | *(bffRawTrafic + jump + 51)))&&(ports.srcPort == (*(bffRawTrafic + jump + 52) << 8 | *(bffRawTrafic + jump + 53)))))
-                    {  
-                        
+                    if (ip_shost == ip_dhost_temp && ip_dhost == ip_shost_temp && ports.srcPort == ports_temp.dstPort && ports.dstPort == ports_temp.srcPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                
-                        iptTemp=timestampTemp-timestampPrev;
-                        iptsCad+= std::to_string(iptTemp)+",";
+
+                        iptTemp = timestampTemp - timestampPrev;
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
+
                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl= incl_leng<min_bpktl?incl_leng:min_bpktl;
-                        max_bpktl= incl_leng>max_bpktl?incl_leng:max_bpktl;
+
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
-                        total_biat += iptTemp;
+                        vector_std_flowiat.push_back(iptTemp);
                         //
-                        min_biat = iptTemp<min_biat? iptTemp :min_biat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_biat = iptTemp>max_biat? iptTemp :max_biat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
-                        vector_std_biat.push_back(iptTemp);
+                        mean_flowiat += iptTemp;
+                        if (!iatBackwardState)
+                        {
+                            iatBackwardState = true;
+                            timestampPrevBackware = timestampTemp;
+                            min_bpktl = incl_leng;
+                            min_biat = timestampTemp;
+                        }
+                        else
+                        {
+                            iptTemp = timestampTemp - timestampPrevBackware;
+                            //
+                            total_biat += iptTemp;
+                            //
+                            min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                            //
+                            max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                            //
+                            vector_std_biat.push_back(iptTemp);
+                        }
+
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+                        timestampPrevBackware = timestampTemp;
                         //
                         calculateFlagsBackward();
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
-                        //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
-                        //
-                        mean_flowiat += iptTemp;
-                        //
-                        vector_std_flowiat.push_back(iptTemp);
-                        //
                         calculateFlagsFlow();
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
-                    
                 }
                 else
                 {
@@ -515,7 +575,6 @@ void *scanFlowIpv4TCP(void *valor)
                 jump += incl_leng + 16;
             }
         }
-
     }
 
     //  yield();
@@ -530,140 +589,146 @@ void *scanFlowIpv4UDP(void *valor)
     //yield();
     pthread_mutex_lock(&mutex); //Inicio SC
     resetVar();
-    jump=0;
+    jump = 0;
     printf("hilo->%d\n", *(int *)valor);
-   
+
     while (true)
     {
         //printf("primer ciclo\n");
         while (true)
         {
-           //printf("segundo ciclo\n");
+            //printf("segundo ciclo\n");
 
             //verifica si ya se recorrio todo el archivo, si es asi limpia los contadores y jump = ultima posicion de primer paquete del flojo
-            if(jump >= pointerbffRawTrafic){ 
+            if (jump >= pointerbffRawTrafic)
+            {
                 //printf("\nTermino scaneo\n");
-                if(traficTipe==_UDP){
+                if (traficTipe == _UDP)
+                {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl=min_bpktl==65535?0:min_bpktl;
-                    mean_fpktl=total_fpktl/((float)total_fpackets);
-                    mean_bpktl= total_bpackets>0?(total_bpktl/((float)total_bpackets)):NAN;
+                    min_bpktl = min_bpktl == 65535 ? 0 : min_bpktl;
+                    mean_fpktl = total_fpktl / ((float)total_fpackets);
+                    mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //min_biat = min_biat== 65536 ? 0 : min_biat;
                     //
-                    mean_fiat= ((float)total_fiat)/(total_fpackets-1);
-                    mean_biat= total_bpackets>1?total_biat/(total_bpackets-1):NAN;
+                    mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
+                    mean_biat = total_bpackets > 1 ? total_biat / (total_bpackets - 1) : NAN;
                     //
-                    mean_flowpktl=(mean_flowpktl/(total_fpackets+total_bpackets));
+                    mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
-                    mean_flowiat = mean_flowiat/(total_fpackets+total_bpackets);
+                    mean_flowiat = mean_flowiat / (total_fpackets + total_bpackets);
                     //
                     calculate_std_pktl();
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    fprintf(csv, "UDP,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n", 
-                    ip_shost>>24,((ip_shost>>16)&0x0ff),((ip_shost>>8)&0x0ff),((ip_shost)&0x0ff),
-                    ip_dhost>>24,((ip_dhost>>16)&0x0ff),((ip_dhost>>8)&0x0ff),((ip_dhost)&0x0ff),
-                    ip_shost>>24,(ip_shost>>16)&0x0ff,(ip_shost>>8)&0x0ff,(ip_shost)&0x0ff,ports.srcPort,
-                    ip_dhost>>24,(ip_dhost>>16)&0x0ff,(ip_dhost>>8)&0x0ff,(ip_dhost)&0x0ff,ports.dstPort,
-                    timestampPrev-timestampInit,
-                    total_fpackets,
-                    total_bpackets,
-                    total_fpktl,
-                    total_bpktl,
-                    min_fpktl,
-                    min_bpktl,
-                    max_fpktl,
-                    max_bpktl,
-                    mean_fpktl,
-                    mean_bpktl,
-                    std_fpktl,
-                    std_bpktl,
-                    total_fiat,
-                    total_biat,
-                    min_fiat,
-                    min_biat,
-                    max_fiat,
-                    max_biat,
-                    mean_fiat,
-                    mean_biat,
-                    std_fiat,
-                    std_biat,
-                    fpsh_cnt,
-                    bpsh_cnt,
-                    furg_cnt,
-                    burg_cnt,
-                    (total_fpackets/(timestampPrev-timestampInit)),
-                    (total_bpackets/(timestampPrev-timestampInit)),
-                    ((total_fpackets+total_bpackets)/(timestampPrev-timestampInit)),
-                    ((total_fpktl+total_bpktl)/(timestampPrev-timestampInit)),
-                    min_flowpktl,
-                    max_flowpktl,
-                    mean_flowpktl,
-                    std_flowpktl,
-                    min_flowiat,
-                    max_flowiat,
-                    mean_flowiat,
-                    std_flowiat,
-                    flow_fin,
-                    flow_syn,
-                    flow_rst,
-                    flow_psh,
-                    flow_ack,
-                    flow_urg,
-                    flow_cwr,
-                    flow_ece
-                    );
+                    fprintf(csv, "UDP,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
+                            ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
+                            ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
+                            ip_shost >> 24, (ip_shost >> 16) & 0x0ff, (ip_shost >> 8) & 0x0ff, (ip_shost)&0x0ff, ports.srcPort,
+                            ip_dhost >> 24, (ip_dhost >> 16) & 0x0ff, (ip_dhost >> 8) & 0x0ff, (ip_dhost)&0x0ff, ports.dstPort,
+                            timestampPrev - timestampInit,
+                            total_fpackets,
+                            total_bpackets,
+                            total_fpktl,
+                            total_bpktl,
+                            min_fpktl,
+                            min_bpktl,
+                            max_fpktl,
+                            max_bpktl,
+                            mean_fpktl,
+                            mean_bpktl,
+                            std_fpktl,
+                            std_bpktl,
+                            total_fiat,
+                            total_biat,
+                            min_fiat,
+                            min_biat,
+                            max_fiat,
+                            max_biat,
+                            mean_fiat,
+                            mean_biat,
+                            std_fiat,
+                            std_biat,
+                            fpsh_cnt,
+                            bpsh_cnt,
+                            furg_cnt,
+                            burg_cnt,
+                            (total_fpackets / (timestampPrev - timestampInit)),
+                            (total_bpackets / (timestampPrev - timestampInit)),
+                            ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)),
+                            ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)),
+                            min_flowpktl,
+                            max_flowpktl,
+                            mean_flowpktl,
+                            std_flowpktl,
+                            min_flowiat,
+                            max_flowiat,
+                            mean_flowiat,
+                            std_flowiat,
+                            flow_fin,
+                            flow_syn,
+                            flow_rst,
+                            flow_psh,
+                            flow_ack,
+                            flow_urg,
+                            flow_cwr,
+                            flow_ece,
+                            (total_fpackets / (float)total_bpackets));
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
-                   //printf("Timestamp%f\n",timestampInit);
-                   //printf("Timestamp%f\n",timestampPrev);
-                   // printf("time sesion: %f\n",(timestampPrev-timestampInit));
+                    //printf("Timestamp%f\n",timestampInit);
+                    //printf("Timestamp%f\n",timestampPrev);
+                    // printf("time sesion: %f\n",(timestampPrev-timestampInit));
                 }
-                
-                if(traficTipe==0){
+
+                if (traficTipe == 0)
+                {
                     //fin de scaneo de trafico
                     //printf("\nfin del programa\n");
                     //printf("jump:%llu",jump);
-                    printf("fin del programa:%" PRId64 "\n",jump);
+                    printf("fin del programa:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
                 }
                 //limpiar varibles
                 resetVar();
-                if(traficPointer%1024==0){
-                    printf("Bytes procesados->%" PRId64 "\n",traficPointer);
+                if (traficPointer % 1024 == 0)
+                {
+                    printf("Bytes procesados->%" PRId64 "\n", traficPointer);
                 }
-                jump=traficPointer;
-                traficTipe=0;
-                }
+                jump = traficPointer;
+                traficTipe = 0;
+            }
             while (jump < pointerbffRawTrafic)
-            {   
-            //printf("miestras es menor");
+            {
+                //printf("miestras es menor");
 
                 //
                 incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                 timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
 
                 //busca paquetes distintos de cero
-                while (timestampTemp == 0||!((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV4)||!(*(bffRawTrafic + (jump + 39)) == _UDP))
+                while (timestampTemp == 0 || !((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV4) || !(*(bffRawTrafic + (jump + 39)) == _UDP))
                 {
-                    if(jump == pointerbffRawTrafic){
-                    break;}
+                    if (jump == pointerbffRawTrafic)
+                    {
+                        break;
+                    }
                     jump += incl_leng + 16;
-                    
+
                     incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                     timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
-                    
                 }
                 //check if ipv4
                 if ((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV4)
                 {
-                    
-                    if(!(*(bffRawTrafic + (jump + 39)) == _UDP) ){
+
+                    if (!(*(bffRawTrafic + (jump + 39)) == _UDP))
+                    {
                         jump += incl_leng + 16;
                         break;
                     }
@@ -705,112 +770,110 @@ void *scanFlowIpv4UDP(void *valor)
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
                         jump += incl_leng + 16;
-                        traficPointer=jump;
+                        traficPointer = jump;
                         break;
                     }
+                    ip_shost_temp = *(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45);
+                    ip_dhost_temp = *(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49);
+                    ports_temp.srcPort = *(bffRawTrafic + jump + 50) << 8 | *(bffRawTrafic + jump + 51);
+                    ports_temp.dstPort = *(bffRawTrafic + jump + 52) << 8 | *(bffRawTrafic + jump + 53);
                     //timeout sesion
-                    if(timestampTemp-timestampPrev>100){
+                    if (timestampTemp - timestampPrev > 100)
+                    {
                         jump = pointerbffRawTrafic;
                         //printf("timeout\n");
                         break;
                     }
                     //check if the forward direction
-                    if (
-                    (ip_shost==(*(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45))
-                    &&(ip_dhost==(*(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49))))
-                    &&((ports.srcPort == (*(bffRawTrafic + jump + 50) << 8 | *(bffRawTrafic + jump + 51)))&&(ports.dstPort == (*(bffRawTrafic + jump + 52) << 8 | *(bffRawTrafic + jump + 53)))))
-                    {  
-                    
+                    if (ip_shost == ip_shost_temp && ip_dhost == ip_dhost_temp && ports.srcPort == ports_temp.srcPort && ports.dstPort == ports_temp.dstPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
                         //
-                        iptTemp=timestampTemp-timestampPrev;
+                        iptTemp = timestampTemp - timestampPrev;
                         //
-                        iptsCad+= std::to_string(iptTemp)+",";
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
                         total_fpktl += incl_leng;
                         //
-                        min_fpktl= incl_leng<min_fpktl?incl_leng:min_fpktl;
-                        max_fpktl= incl_leng>max_fpktl?incl_leng:max_fpktl;
+                        min_fpktl = incl_leng < min_fpktl ? incl_leng : min_fpktl;
+                        max_fpktl = incl_leng > max_fpktl ? incl_leng : max_fpktl;
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
                         total_fiat += iptTemp;
                         //
-                        min_fiat = iptTemp<min_fiat? iptTemp :min_fiat;
+                        min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
                         //
-                        max_fiat = iptTemp>max_fiat? iptTemp :max_fiat;
+                        max_fiat = iptTemp > max_fiat ? iptTemp : max_fiat;
                         //
                         vector_std_fiat.push_back(iptTemp);
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
 
                     //check if the backward direction
-                   if (
-                    (ip_dhost==(*(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45))
-                    &&(ip_shost==(*(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49))))
-                    &&((ports.dstPort == (*(bffRawTrafic + jump + 50) << 8 | *(bffRawTrafic + jump + 51)))&&(ports.srcPort == (*(bffRawTrafic + jump + 52) << 8 | *(bffRawTrafic + jump + 53)))))
-                    {  
-                        
+                    if (ip_shost == ip_dhost_temp && ip_dhost == ip_shost_temp && ports.srcPort == ports_temp.dstPort && ports.dstPort == ports_temp.srcPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                
-                        iptTemp=timestampTemp-timestampPrev;
-                        iptsCad+= std::to_string(iptTemp)+",";
+
+                        iptTemp = timestampTemp - timestampPrev;
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl= incl_leng<min_bpktl?incl_leng:min_bpktl;
-                        max_bpktl= incl_leng>max_bpktl?incl_leng:max_bpktl;
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
                         total_biat += iptTemp;
                         //
-                        min_biat = iptTemp<min_biat? iptTemp :min_biat;
+                        min_biat = iptTemp < min_biat ? iptTemp : min_biat;
                         //
-                        max_biat = iptTemp>max_biat? iptTemp :max_biat;
+                        max_biat = iptTemp > max_biat ? iptTemp : max_biat;
                         //
                         vector_std_biat.push_back(iptTemp);
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
-                    
                 }
                 else
                 {
@@ -820,7 +883,6 @@ void *scanFlowIpv4UDP(void *valor)
                 jump += incl_leng + 16;
             }
         }
-
     }
 
     //  yield();
@@ -837,143 +899,147 @@ void *scanFlowIpv6TCP(void *valor)
     pthread_mutex_lock(&mutex); //Inicio SC
     printf("hilo->%d\n", *(int *)valor);
     resetVar();
-    jump=0;
-   
+    jump = 0;
+
     while (true)
     {
         //printf("primer ciclo\n");
         while (true)
         {
-           //printf("segundo ciclo\n");
+            //printf("segundo ciclo\n");
 
             //verifica si ya se recorrio todo el archivo, si es asi limpia los contadores y jump = ultima posicion de primer paquete del flojo
-            if(jump >= pointerbffRawTrafic){ 
-               // printf("\nTermino scaneo\n");
-                if(traficTipe==_TCP){
+            if (jump >= pointerbffRawTrafic)
+            {
+                // printf("\nTermino scaneo\n");
+                if (traficTipe == _TCP)
+                {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl=min_bpktl==65535?0:min_bpktl;
-                    mean_fpktl=total_fpktl/((float)total_fpackets);
-                    mean_bpktl= total_bpackets>0?(total_bpktl/((float)total_bpackets)):NAN;
+                    min_bpktl = min_bpktl == 65535 ? 0 : min_bpktl;
+                    mean_fpktl = total_fpktl / ((float)total_fpackets);
+                    mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //min_biat = min_biat== 65536 ? 0 : min_biat;
                     //
-                    mean_fiat= ((float)total_fiat)/(total_fpackets-1);
-                    mean_biat= total_bpackets>1?total_biat/(total_bpackets-1):NAN;
+                    mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
+                    mean_biat = total_bpackets > 1 ? total_biat / (total_bpackets - 1) : NAN;
                     //
-                    mean_flowpktl=(mean_flowpktl/(total_fpackets+total_bpackets));
+                    mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
-                    mean_flowiat = mean_flowiat/(total_fpackets+total_bpackets);
+                    mean_flowiat = mean_flowiat / (total_fpackets + total_bpackets);
                     //
                     calculate_std_pktl();
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    fprintf(csv, "TCP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n", 
-                    ipv6_SCad.c_str(),
-                    ipv6_DCad.c_str(),
-                    ipv6_SCad.c_str(),ports.srcPort,
-                    ipv6_DCad.c_str(),ports.dstPort,
-                    timestampPrev-timestampInit,
-                    total_fpackets,
-                    total_bpackets,
-                    total_fpktl,
-                    total_bpktl,
-                    min_fpktl,
-                    min_bpktl,
-                    max_fpktl,
-                    max_bpktl,
-                    mean_fpktl,
-                    mean_bpktl,
-                    std_fpktl,
-                    std_bpktl,
-                    total_fiat,
-                    total_biat,
-                    min_fiat,
-                    min_biat,
-                    max_fiat,
-                    max_biat,
-                    mean_fiat,
-                    mean_biat,
-                    std_fiat,
-                    std_biat,
-                    fpsh_cnt,
-                    bpsh_cnt,
-                    furg_cnt,
-                    burg_cnt,
-                    (total_fpackets/(float)(timestampPrev-timestampInit)),
-                    (total_bpackets/(float)(timestampPrev-timestampInit)),
-                    ((total_fpackets+total_bpackets)/(timestampPrev-timestampInit)),
-                    ((total_fpktl+total_bpktl)/(timestampPrev-timestampInit)),
-                    min_flowpktl,
-                    max_flowpktl,
-                    mean_flowpktl,
-                    std_flowpktl,
-                    min_flowiat,
-                    max_flowiat,
-                    mean_flowiat,
-                    std_flowiat,
-                    flow_fin,
-                    flow_syn,
-                    flow_rst,
-                    flow_psh,
-                    flow_ack,
-                    flow_urg,
-                    flow_cwr,
-                    flow_ece
-                    );
+                    fprintf(csv, "TCP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                            ipv6_SCad.c_str(),
+                            ipv6_DCad.c_str(),
+                            ipv6_SCad.c_str(), ports.srcPort,
+                            ipv6_DCad.c_str(), ports.dstPort,
+                            timestampPrev - timestampInit,
+                            total_fpackets,
+                            total_bpackets,
+                            total_fpktl,
+                            total_bpktl,
+                            min_fpktl,
+                            min_bpktl,
+                            max_fpktl,
+                            max_bpktl,
+                            mean_fpktl,
+                            mean_bpktl,
+                            std_fpktl,
+                            std_bpktl,
+                            total_fiat,
+                            total_biat,
+                            min_fiat,
+                            min_biat,
+                            max_fiat,
+                            max_biat,
+                            mean_fiat,
+                            mean_biat,
+                            std_fiat,
+                            std_biat,
+                            fpsh_cnt,
+                            bpsh_cnt,
+                            furg_cnt,
+                            burg_cnt,
+                            (total_fpackets / (float)(timestampPrev - timestampInit)),
+                            (total_bpackets / (float)(timestampPrev - timestampInit)),
+                            ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)),
+                            ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)),
+                            min_flowpktl,
+                            max_flowpktl,
+                            mean_flowpktl,
+                            std_flowpktl,
+                            min_flowiat,
+                            max_flowiat,
+                            mean_flowiat,
+                            std_flowiat,
+                            flow_fin,
+                            flow_syn,
+                            flow_rst,
+                            flow_psh,
+                            flow_ack,
+                            flow_urg,
+                            flow_cwr,
+                            flow_ece);
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
-                   //printf("Timestamp->init: %.20f\n",timestampInit);
-                   //printf("Timestamp->prev: %f\n",timestampPrev);
-                   //printf("resultado:%.20f\n", (timestampPrev-timestampInit));
-                   //printf("total de paquete f:%d\n",total_fpackets);
-                   // printf("time sesion: %f\n",(timestampPrev-timestampInit));
+                    //printf("Timestamp->init: %.20f\n",timestampInit);
+                    //printf("Timestamp->prev: %f\n",timestampPrev);
+                    //printf("resultado:%.20f\n", (timestampPrev-timestampInit));
+                    //printf("total de paquete f:%d\n",total_fpackets);
+                    // printf("time sesion: %f\n",(timestampPrev-timestampInit));
                 }
-                
-                if(traficTipe==0){
+
+                if (traficTipe == 0)
+                {
                     //fin de scaneo de trafico
                     //printf("\nfin del programa\n");
                     //printf("jump:%llu",jump);
-                    printf("fin del programa:%" PRId64  "\n",jump);
+                    printf("fin del programa:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
                 }
                 //limpiar varibles
                 resetVar();
-                if(traficPointer%1024==0){
-                    printf("Bytes procesados->%" PRId64 "\n",traficPointer);
+                if (traficPointer % 1024 == 0)
+                {
+                    printf("Bytes procesados->%" PRId64 "\n", traficPointer);
                 }
-                jump=traficPointer;
-                traficTipe=0;
-                }
+                jump = traficPointer;
+                traficTipe = 0;
+            }
             while (jump < pointerbffRawTrafic)
-            {   
-            //printf("miestras es menor");
+            {
+                //printf("miestras es menor");
 
                 //
                 incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                 timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
 
                 //busca paquetes distintos de cero
-                while (timestampTemp == 0||!((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6)||!(*(bffRawTrafic + (jump + 36)) == _TCP))
+                while (timestampTemp == 0 || !((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6) || !(*(bffRawTrafic + (jump + 36)) == _TCP))
                 {
-                    if(jump == pointerbffRawTrafic){
-                    break;}
+                    if (jump == pointerbffRawTrafic)
+                    {
+                        break;
+                    }
                     jump += incl_leng + 16;
-                    
+
                     incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                     timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
-
-                    
                 }
 
                 //check if ipv4
                 if ((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6)
                 {
-                    
-                    if(!(*(bffRawTrafic + (jump + 36)) == _TCP) ){
+
+                    if (!(*(bffRawTrafic + (jump + 36)) == _TCP))
+                    {
                         jump += incl_leng + 16;
                         break;
                     }
@@ -985,16 +1051,16 @@ void *scanFlowIpv6TCP(void *valor)
                         //extraccion de ip y puertos
                         for (size_t i = 0; i < 16; i++)
                         {
-                            ipv6_shost =ipv6_shost<<8| *(bffRawTrafic + jump + 38+i);
-                            stream << std::hex <<(int) (*(bffRawTrafic + jump + 38+i));
-                            ipv6_SCad+= stream.str();
+                            ipv6_shost = ipv6_shost << 8 | *(bffRawTrafic + jump + 38 + i);
+                            stream << std::hex << (int)(*(bffRawTrafic + jump + 38 + i));
+                            ipv6_SCad += stream.str();
                             stream.str("");
-                            ipv6_dhost = ipv6_dhost <<8| *(bffRawTrafic + jump + 54+i);
-                            stream << std::hex <<(int) (*(bffRawTrafic + jump + 54+i));
-                            ipv6_DCad+= stream.str();
+                            ipv6_dhost = ipv6_dhost << 8 | *(bffRawTrafic + jump + 54 + i);
+                            stream << std::hex << (int)(*(bffRawTrafic + jump + 54 + i));
+                            ipv6_DCad += stream.str();
                             stream.str("");
                         }
-                       
+
                         ports.srcPort = *(bffRawTrafic + jump + 70) << 8 | *(bffRawTrafic + jump + 71);
                         ports.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
                         //extraccion de featurs forward direccion primer paquete encontrado de la sesion a scanear
@@ -1027,121 +1093,121 @@ void *scanFlowIpv6TCP(void *valor)
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
                         jump += incl_leng + 16;
-                        traficPointer=jump;
+                        traficPointer = jump;
                         break;
                     }
                     for (size_t i = 0; i < 16; i++)
-                        {
-                            ipv6_shost_temp =ipv6_shost_temp<<8| *(bffRawTrafic + jump + 38+i);
-                            ipv6_dhost_temp = ipv6_dhost_temp <<8| *(bffRawTrafic + jump + 54+i);
-                        }
-                        ports_temp.srcPort = *(bffRawTrafic + jump + 70) << 8 | *(bffRawTrafic + jump + 71);
-                        ports_temp.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
+                    {
+                        ipv6_shost_temp = ipv6_shost_temp << 8 | *(bffRawTrafic + jump + 38 + i);
+                        ipv6_dhost_temp = ipv6_dhost_temp << 8 | *(bffRawTrafic + jump + 54 + i);
+                    }
+                    ports_temp.srcPort = *(bffRawTrafic + jump + 70) << 8 | *(bffRawTrafic + jump + 71);
+                    ports_temp.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
                     //timeout sesion
-                    if(timestampTemp-timestampPrev>100){
+                    if (timestampTemp - timestampPrev > 100)
+                    {
                         jump = pointerbffRawTrafic;
                         //printf("timeout\n");
                         break;
                     }
                     //check if the forward direction
-                    if (ipv6_shost==ipv6_shost_temp && ipv6_dhost==ipv6_dhost_temp && ports.srcPort == ports_temp.srcPort && ports.dstPort == ports_temp.dstPort)
-                    {  
-                    
+                    if (ipv6_shost == ipv6_shost_temp && ipv6_dhost == ipv6_dhost_temp && ports.srcPort == ports_temp.srcPort && ports.dstPort == ports_temp.dstPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
                         //
-                        iptTemp=timestampTemp-timestampPrev;
+                        iptTemp = timestampTemp - timestampPrev;
                         //
-                        iptsCad+= std::to_string(iptTemp)+",";
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
                         total_fpktl += incl_leng;
                         //
-                        min_fpktl= incl_leng<min_fpktl?incl_leng:min_fpktl;
-                        max_fpktl= incl_leng>max_fpktl?incl_leng:max_fpktl;
+                        min_fpktl = incl_leng < min_fpktl ? incl_leng : min_fpktl;
+                        max_fpktl = incl_leng > max_fpktl ? incl_leng : max_fpktl;
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
                         total_fiat += iptTemp;
                         //
-                        min_fiat = iptTemp<min_fiat? iptTemp :min_fiat;
+                        min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
                         //
-                        max_fiat = iptTemp>max_fiat? iptTemp :max_fiat;
+                        max_fiat = iptTemp > max_fiat ? iptTemp : max_fiat;
                         //
                         vector_std_fiat.push_back(iptTemp);
                         //
                         calculateFlagsForwardv6();
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
                         //
                         calculateFlagsFlowv6();
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
 
                     //check if the backward direction
-                   if (ipv6_dhost == ipv6_shost_temp && ipv6_shost == ipv6_dhost_temp && ports.dstPort == ports_temp.srcPort && ports.srcPort == ports_temp.dstPort)
-                    {  
-                        
+                    if (ipv6_dhost == ipv6_shost_temp && ipv6_shost == ipv6_dhost_temp && ports.dstPort == ports_temp.srcPort && ports.srcPort == ports_temp.dstPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                
-                        iptTemp=timestampTemp-timestampPrev;
-                        iptsCad+= std::to_string(iptTemp)+",";
+
+                        iptTemp = timestampTemp - timestampPrev;
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl= incl_leng<min_bpktl?incl_leng:min_bpktl;
-                        max_bpktl= incl_leng>max_bpktl?incl_leng:max_bpktl;
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
                         total_biat += iptTemp;
                         //
-                        min_biat = iptTemp<min_biat? iptTemp :min_biat;
+                        min_biat = iptTemp < min_biat ? iptTemp : min_biat;
                         //
-                        max_biat = iptTemp>max_biat? iptTemp :max_biat;
+                        max_biat = iptTemp > max_biat ? iptTemp : max_biat;
                         //
                         vector_std_biat.push_back(iptTemp);
                         //
                         calculateFlagsBackwardv6();
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
                         //
                         calculateFlagsFlowv6();
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
-                    
                 }
                 else
                 {
@@ -1151,7 +1217,6 @@ void *scanFlowIpv6TCP(void *valor)
                 jump += incl_leng + 16;
             }
         }
-
     }
 
     //  yield();
@@ -1167,141 +1232,145 @@ void *scanFlowIpv6UDP(void *valor)
     pthread_mutex_lock(&mutex); //Inicio SC
     printf("hilo->%d\n", *(int *)valor);
     resetVar();
-    jump=0;
-   
+    jump = 0;
+
     while (true)
     {
         //printf("primer ciclo\n");
         while (true)
         {
-           //printf("segundo ciclo\n");
+            //printf("segundo ciclo\n");
 
             //verifica si ya se recorrio todo el archivo, si es asi limpia los contadores y jump = ultima posicion de primer paquete del flojo
-            if(jump >= pointerbffRawTrafic){ 
-               // printf("\nTermino scaneo\n");
-                if(traficTipe==_UDP){
+            if (jump >= pointerbffRawTrafic)
+            {
+                // printf("\nTermino scaneo\n");
+                if (traficTipe == _UDP)
+                {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl=min_bpktl==65535?0:min_bpktl;
-                    mean_fpktl=total_fpktl/((float)total_fpackets);
-                    mean_bpktl= total_bpackets>0?(total_bpktl/((float)total_bpackets)):NAN;
+                    min_bpktl = min_bpktl == 65535 ? 0 : min_bpktl;
+                    mean_fpktl = total_fpktl / ((float)total_fpackets);
+                    mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //min_biat = min_biat== 65536 ? 0 : min_biat;
                     //
-                    mean_fiat= ((float)total_fiat)/(total_fpackets-1);
-                    mean_biat= total_bpackets>1?total_biat/(total_bpackets-1):NAN;
+                    mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
+                    mean_biat = total_bpackets > 1 ? total_biat / (total_bpackets - 1) : NAN;
                     //
-                    mean_flowpktl=(mean_flowpktl/(total_fpackets+total_bpackets));
+                    mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
-                    mean_flowiat = mean_flowiat/(total_fpackets+total_bpackets);
+                    mean_flowiat = mean_flowiat / (total_fpackets + total_bpackets);
                     //
                     calculate_std_pktl();
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n", 
-                    ipv6_SCad.c_str(),
-                    ipv6_DCad.c_str(),
-                    ipv6_SCad.c_str(),ports.srcPort,
-                    ipv6_DCad.c_str(),ports.dstPort,
-                    timestampPrev-timestampInit,
-                    total_fpackets,
-                    total_bpackets,
-                    total_fpktl,
-                    total_bpktl,
-                    min_fpktl,
-                    min_bpktl,
-                    max_fpktl,
-                    max_bpktl,
-                    mean_fpktl,
-                    mean_bpktl,
-                    std_fpktl,
-                    std_bpktl,
-                    total_fiat,
-                    total_biat,
-                    min_fiat,
-                    min_biat,
-                    max_fiat,
-                    max_biat,
-                    mean_fiat,
-                    mean_biat,
-                    std_fiat,
-                    std_biat,
-                    fpsh_cnt,
-                    bpsh_cnt,
-                    furg_cnt,
-                    burg_cnt,
-                    (total_fpackets/(timestampPrev-timestampInit)),
-                    (total_bpackets/(timestampPrev-timestampInit)),
-                    ((total_fpackets+total_bpackets)/(timestampPrev-timestampInit)),
-                    ((total_fpktl+total_bpktl)/(timestampPrev-timestampInit)),
-                    min_flowpktl,
-                    max_flowpktl,
-                    mean_flowpktl,
-                    std_flowpktl,
-                    min_flowiat,
-                    max_flowiat,
-                    mean_flowiat,
-                    std_flowiat,
-                    flow_fin,
-                    flow_syn,
-                    flow_rst,
-                    flow_psh,
-                    flow_ack,
-                    flow_urg,
-                    flow_cwr,
-                    flow_ece
-                    );
+                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                            ipv6_SCad.c_str(),
+                            ipv6_DCad.c_str(),
+                            ipv6_SCad.c_str(), ports.srcPort,
+                            ipv6_DCad.c_str(), ports.dstPort,
+                            timestampPrev - timestampInit,
+                            total_fpackets,
+                            total_bpackets,
+                            total_fpktl,
+                            total_bpktl,
+                            min_fpktl,
+                            min_bpktl,
+                            max_fpktl,
+                            max_bpktl,
+                            mean_fpktl,
+                            mean_bpktl,
+                            std_fpktl,
+                            std_bpktl,
+                            total_fiat,
+                            total_biat,
+                            min_fiat,
+                            min_biat,
+                            max_fiat,
+                            max_biat,
+                            mean_fiat,
+                            mean_biat,
+                            std_fiat,
+                            std_biat,
+                            fpsh_cnt,
+                            bpsh_cnt,
+                            furg_cnt,
+                            burg_cnt,
+                            (total_fpackets / (timestampPrev - timestampInit)),
+                            (total_bpackets / (timestampPrev - timestampInit)),
+                            ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)),
+                            ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)),
+                            min_flowpktl,
+                            max_flowpktl,
+                            mean_flowpktl,
+                            std_flowpktl,
+                            min_flowiat,
+                            max_flowiat,
+                            mean_flowiat,
+                            std_flowiat,
+                            flow_fin,
+                            flow_syn,
+                            flow_rst,
+                            flow_psh,
+                            flow_ack,
+                            flow_urg,
+                            flow_cwr,
+                            flow_ece);
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
-                   //printf("Timestamp%f\n",timestampInit);
-                   //printf("Timestamp%f\n",timestampPrev);
-                   // printf("time sesion: %f\n",(timestampPrev-timestampInit));
+                    //printf("Timestamp%f\n",timestampInit);
+                    //printf("Timestamp%f\n",timestampPrev);
+                    // printf("time sesion: %f\n",(timestampPrev-timestampInit));
                 }
-                
-                if(traficTipe==0){
+
+                if (traficTipe == 0)
+                {
                     //fin de scaneo de trafico
                     //printf("\nfin del programa\n");
                     //printf("jump:%llu",jump);
-                    printf("fin del programa:%" PRId64 "\n",jump);
+                    printf("fin del programa:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
                 }
                 //limpiar varibles
                 resetVar();
-                if(traficPointer%1024==0){
-                    printf("Bytes procesados->%" PRId64 "\n",traficPointer);
+                if (traficPointer % 1024 == 0)
+                {
+                    printf("Bytes procesados->%" PRId64 "\n", traficPointer);
                 }
-                jump=traficPointer;
-                traficTipe=0;
-                }
+                jump = traficPointer;
+                traficTipe = 0;
+            }
             while (jump < pointerbffRawTrafic)
-            {   
-            //printf("miestras es menor");
+            {
+                //printf("miestras es menor");
 
                 //
                 incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                 timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
 
                 //busca paquetes distintos de cero
-                while (timestampTemp == 0||!((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6)||!(*(bffRawTrafic + (jump + 36)) == _UDP))
+                while (timestampTemp == 0 || !((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6) || !(*(bffRawTrafic + (jump + 36)) == _UDP))
                 {
-                    if(jump == pointerbffRawTrafic){
-                    break;}
+                    if (jump == pointerbffRawTrafic)
+                    {
+                        break;
+                    }
                     jump += incl_leng + 16;
-                    
+
                     incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
                     timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
-
-                    
                 }
 
                 //check if ipv4
                 if ((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6)
                 {
-                    
-                    if(!(*(bffRawTrafic + (jump + 36)) == _UDP) ){
+
+                    if (!(*(bffRawTrafic + (jump + 36)) == _UDP))
+                    {
                         jump += incl_leng + 16;
                         break;
                     }
@@ -1313,16 +1382,16 @@ void *scanFlowIpv6UDP(void *valor)
                         //extraccion de ip y puertos
                         for (size_t i = 0; i < 16; i++)
                         {
-                            ipv6_shost =ipv6_shost<<8| *(bffRawTrafic + jump + 38+i);
-                            stream << std::hex <<(int) (*(bffRawTrafic + jump + 38+i));
-                            ipv6_SCad+= stream.str();
+                            ipv6_shost = ipv6_shost << 8 | *(bffRawTrafic + jump + 38 + i);
+                            stream << std::hex << (int)(*(bffRawTrafic + jump + 38 + i));
+                            ipv6_SCad += stream.str();
                             stream.str("");
-                            ipv6_dhost = ipv6_dhost <<8| *(bffRawTrafic + jump + 54+i);
-                            stream << std::hex <<(int) (*(bffRawTrafic + jump + 54+i));
-                            ipv6_DCad+= stream.str();
+                            ipv6_dhost = ipv6_dhost << 8 | *(bffRawTrafic + jump + 54 + i);
+                            stream << std::hex << (int)(*(bffRawTrafic + jump + 54 + i));
+                            ipv6_DCad += stream.str();
                             stream.str("");
                         }
-                       
+
                         ports.srcPort = *(bffRawTrafic + jump + 70) << 8 | *(bffRawTrafic + jump + 71);
                         ports.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
                         //extraccion de featurs forward direccion primer paquete encontrado de la sesion a scanear
@@ -1352,114 +1421,114 @@ void *scanFlowIpv6UDP(void *valor)
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
                         jump += incl_leng + 16;
-                        traficPointer=jump;
+                        traficPointer = jump;
                         break;
                     }
                     for (size_t i = 0; i < 16; i++)
-                        {
-                            ipv6_shost_temp =ipv6_shost_temp<<8| *(bffRawTrafic + jump + 38+i);
-                            ipv6_dhost_temp = ipv6_dhost_temp <<8| *(bffRawTrafic + jump + 54+i);
-                        }
-                        ports_temp.srcPort = *(bffRawTrafic + jump + 70) << 8 | *(bffRawTrafic + jump + 71);
-                        ports_temp.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
+                    {
+                        ipv6_shost_temp = ipv6_shost_temp << 8 | *(bffRawTrafic + jump + 38 + i);
+                        ipv6_dhost_temp = ipv6_dhost_temp << 8 | *(bffRawTrafic + jump + 54 + i);
+                    }
+                    ports_temp.srcPort = *(bffRawTrafic + jump + 70) << 8 | *(bffRawTrafic + jump + 71);
+                    ports_temp.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
                     //timeout sesion
-                    if(timestampTemp-timestampPrev>100){
+                    if (timestampTemp - timestampPrev > 100)
+                    {
                         jump = pointerbffRawTrafic;
                         //printf("timeout\n");
                         break;
                     }
                     //check if the forward direction
-                    if (ipv6_shost==ipv6_shost_temp && ipv6_dhost==ipv6_dhost_temp && ports.srcPort == ports_temp.srcPort && ports.dstPort == ports_temp.dstPort)
-                    {  
-                    
+                    if (ipv6_shost == ipv6_shost_temp && ipv6_dhost == ipv6_dhost_temp && ports.srcPort == ports_temp.srcPort && ports.dstPort == ports_temp.dstPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
                         //
-                        iptTemp=timestampTemp-timestampPrev;
+                        iptTemp = timestampTemp - timestampPrev;
                         //
-                        iptsCad+= std::to_string(iptTemp)+",";
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
                         total_fpktl += incl_leng;
                         //
-                        min_fpktl= incl_leng<min_fpktl?incl_leng:min_fpktl;
-                        max_fpktl= incl_leng>max_fpktl?incl_leng:max_fpktl;
+                        min_fpktl = incl_leng < min_fpktl ? incl_leng : min_fpktl;
+                        max_fpktl = incl_leng > max_fpktl ? incl_leng : max_fpktl;
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
                         total_fiat += iptTemp;
                         //
-                        min_fiat = iptTemp<min_fiat? iptTemp :min_fiat;
+                        min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
                         //
-                        max_fiat = iptTemp>max_fiat? iptTemp :max_fiat;
+                        max_fiat = iptTemp > max_fiat ? iptTemp : max_fiat;
                         //
                         vector_std_fiat.push_back(iptTemp);
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
 
                     //check if the backward direction
-                   if (ipv6_dhost == ipv6_shost_temp && ipv6_shost == ipv6_dhost_temp && ports.dstPort == ports_temp.srcPort && ports.srcPort == ports_temp.dstPort)
-                    {  
-                        
+                    if (ipv6_dhost == ipv6_shost_temp && ipv6_shost == ipv6_dhost_temp && ports.dstPort == ports_temp.srcPort && ports.srcPort == ports_temp.dstPort)
+                    {
+
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                
-                        iptTemp=timestampTemp-timestampPrev;
-                        iptsCad+= std::to_string(iptTemp)+",";
+
+                        iptTemp = timestampTemp - timestampPrev;
+                        iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl= incl_leng<min_bpktl?incl_leng:min_bpktl;
-                        max_bpktl= incl_leng>max_bpktl?incl_leng:max_bpktl;
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
                         total_biat += iptTemp;
                         //
-                        min_biat = iptTemp<min_biat? iptTemp :min_biat;
+                        min_biat = iptTemp < min_biat ? iptTemp : min_biat;
                         //
-                        max_biat = iptTemp>max_biat? iptTemp :max_biat;
+                        max_biat = iptTemp > max_biat ? iptTemp : max_biat;
                         //
                         vector_std_biat.push_back(iptTemp);
                         //
-                        min_flowpktl = incl_leng<min_flowpktl ? incl_leng:min_flowpktl;
+                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng>max_flowpktl? incl_leng :max_flowpktl;
+                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
                         //
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp<min_flowiat? iptTemp :min_flowiat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_flowiat = iptTemp>max_flowiat? iptTemp :max_flowiat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
                         //
-                        //marcar el paquete 
+                        //marcar el paquete
                         mark(jump);
                     }
-                    
                 }
                 else
                 {
@@ -1469,7 +1538,6 @@ void *scanFlowIpv6UDP(void *valor)
                 jump += incl_leng + 16;
             }
         }
-
     }
 
     //  yield();

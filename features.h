@@ -31,10 +31,17 @@ std::string ipv6_DCad="";
 std::stringstream stream;
 double iptTemp = 0;
 //var flow
+bool iatForwardState =false;
+bool iatBackwardState =false;
+//var flow
 double timestampInit = 0;
 double timestampPrev = 0;
+double timestampPrevForward = 0;
+double timestampPrevBackware = 0;
 uint32_t ip_shost = 0; //
 uint32_t ip_dhost = 0;
+uint32_t ip_shost_temp = 0; //
+uint32_t ip_dhost_temp = 0; //
 __uint128_t ipv6_shost =0;
 __uint128_t ipv6_dhost =0;
 __uint128_t ipv6_shost_temp =0;
@@ -143,7 +150,9 @@ void resetVar()
     vector_std_biat.clear();
     vector_std_flowpktl.clear();
     vector_std_flowiat.clear();
-
+    
+    iatForwardState =false;
+    iatBackwardState =false;
     //flow
     timestampInit = 0;
     timestampPrev = 0;

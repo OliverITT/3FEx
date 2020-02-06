@@ -276,6 +276,9 @@ void *scanFlowIpv4TCP(void *valor)
                     max_fiat = total_fpackets > 1 ? max_fiat : NAN;
                     max_biat = total_bpackets > 1 ? max_biat : NAN;
                     //
+                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
+                    //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
                     mean_flowiat = mean_flowiat / (total_fpackets + total_bpackets);
@@ -284,7 +287,12 @@ void *scanFlowIpv4TCP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
+                    
                     std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
+                    std_fiat = total_fpackets > 1 ? std_fiat : NAN;
+                    std_biat = total_bpackets > 1 ? std_biat : NAN;
+                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
                     fprintf(csv, "TCP,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
                             ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
                             ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
@@ -422,8 +430,6 @@ void *scanFlowIpv4TCP(void *valor)
                         mean_flowpktl = incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
-                        //
-
                         //
                         calculateFlagsFlow();
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
@@ -578,9 +584,9 @@ void *scanFlowIpv4TCP(void *valor)
     }
 
     //  yield();
-    //pthread_mutex_unlock(&mutex); //Fin SC
+    pthread_mutex_unlock(&mutex); //Fin SC
     //yield();
-    printf("fin de funcion");
+    printf("fin de funcion TCP");
     return NULL;
 }
 //flow UDP
@@ -589,9 +595,9 @@ void *scanFlowIpv4UDP(void *valor)
     //yield();
     pthread_mutex_lock(&mutex); //Inicio SC
     resetVar();
-    jump = 0;
+    jump = 0;  //yield();
     printf("hilo->%d\n", *(int *)valor);
-
+    
     while (true)
     {
         //printf("primer ciclo\n");
@@ -607,13 +613,25 @@ void *scanFlowIpv4UDP(void *valor)
                 {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl = min_bpktl == 65535 ? 0 : min_bpktl;
+                    min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
-                    //min_biat = min_biat== 65536 ? 0 : min_biat;
+                    //
+                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_biat = total_bpackets > 1 ? min_biat : NAN;
+                    //
+                    total_fiat = total_fpackets > 1 ? total_fiat : NAN;
+                    total_biat = total_bpackets > 1 ? total_biat : NAN;
+
                     //
                     mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
-                    mean_biat = total_bpackets > 1 ? total_biat / (total_bpackets - 1) : NAN;
+                    mean_biat = total_bpackets > 0 ? total_biat / (total_bpackets - 1) : NAN;
+                    //
+                    max_fiat = total_fpackets > 1 ? max_fiat : NAN;
+                    max_biat = total_bpackets > 1 ? max_biat : NAN;
+                    //
+                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -623,6 +641,12 @@ void *scanFlowIpv4UDP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
+                    
+                    std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
+                    std_fiat = total_fpackets > 1 ? std_fiat : NAN;
+                    std_biat = total_bpackets > 1 ? std_biat : NAN;
+                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
                     fprintf(csv, "UDP,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
                             ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
                             ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
@@ -737,7 +761,7 @@ void *scanFlowIpv4UDP(void *valor)
                         //calculateFlagsFlow();
                         traficTipe = *(bffRawTrafic + (jump + 39));
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                        timestampPrev = timestampInit = timestampTemp;
+                        timestampPrev = timestampPrevForward = timestampInit = timestampTemp;
                         //extraccion de ip y puertos
                         ip_shost = *(bffRawTrafic + jump + 42) << 24 | *(bffRawTrafic + jump + 43) << 16 | *(bffRawTrafic + jump + 44) << 8 | *(bffRawTrafic + jump + 45);
                         ip_dhost = *(bffRawTrafic + jump + 46) << 24 | *(bffRawTrafic + jump + 47) << 16 | *(bffRawTrafic + jump + 48) << 8 | *(bffRawTrafic + jump + 49);
@@ -749,23 +773,16 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         min_fpktl = incl_leng;
                         //
-                        min_bpktl = incl_leng;
-                        //
                         max_fpktl = incl_leng;
                         //
                         vector_std_fpktl.push_back(incl_leng);
+                        //
                         //
                         min_flowpktl = max_flowpktl = incl_leng;
                         //
                         mean_flowpktl = incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
-                        //
-                        min_fiat = timestampTemp;
-                        //
-                        min_biat = timestampTemp;
-                        //
-                        min_flowiat = timestampTemp;
                         //
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
@@ -794,6 +811,8 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
+                        
+
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
                         total_fpktl += incl_leng;
@@ -803,6 +822,12 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
+                        iptTemp = timestampTemp - timestampPrevForward;
+                        if (!iatForwardState)
+                        {
+                            min_fiat = iptTemp;
+                            min_flowiat = iptTemp;
+                        }
                         total_fiat += iptTemp;
                         //
                         min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
@@ -810,6 +835,7 @@ void *scanFlowIpv4UDP(void *valor)
                         max_fiat = iptTemp > max_fiat ? iptTemp : max_fiat;
                         //
                         vector_std_fiat.push_back(iptTemp);
+                        //
                         //
                         min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
@@ -826,6 +852,9 @@ void *scanFlowIpv4UDP(void *valor)
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
+                        //
+                        timestampPrevForward = timestampTemp;
+                        //
                         //marcar el paquete
                         mark(jump);
                     }
@@ -839,22 +868,46 @@ void *scanFlowIpv4UDP(void *valor)
                         iptTemp = timestampTemp - timestampPrev;
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
+
                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
-                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
-                        total_biat += iptTemp;
+                        vector_std_flowiat.push_back(iptTemp);
                         //
-                        min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
-                        vector_std_biat.push_back(iptTemp);
+                        mean_flowiat += iptTemp;
+                        if (!iatBackwardState)
+                        {
+                            iatBackwardState = true;
+                            timestampPrevBackware = timestampTemp;
+                            min_bpktl = incl_leng;
+                            min_biat = timestampTemp;
+                        }
+                        else
+                        {
+                            iptTemp = timestampTemp - timestampPrevBackware;
+                            //
+                            total_biat += iptTemp;
+                            //
+                            min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                            //
+                            max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                            //
+                            vector_std_biat.push_back(iptTemp);
+                        }
+
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+                        timestampPrevBackware = timestampTemp;
+                        //
                         //
                         min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
@@ -864,13 +917,6 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         vector_std_flowpktl.push_back(incl_leng);
                         //
-                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
-                        //
-                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
-                        //
-                        mean_flowiat += iptTemp;
-                        //
-                        vector_std_flowiat.push_back(iptTemp);
                         //marcar el paquete
                         mark(jump);
                     }
@@ -886,9 +932,9 @@ void *scanFlowIpv4UDP(void *valor)
     }
 
     //  yield();
-    //pthread_mutex_unlock(&mutex); //Fin SC
+    pthread_mutex_unlock(&mutex); //Fin SC
     //yield();
-    printf("fin de funcion");
+    printf("fin de funcion UDP");
     return NULL;
 }
 
@@ -916,13 +962,25 @@ void *scanFlowIpv6TCP(void *valor)
                 {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl = min_bpktl == 65535 ? 0 : min_bpktl;
+                     min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
-                    //min_biat = min_biat== 65536 ? 0 : min_biat;
+                    //
+                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_biat = total_bpackets > 1 ? min_biat : NAN;
+                    //
+                    total_fiat = total_fpackets > 1 ? total_fiat : NAN;
+                    total_biat = total_bpackets > 1 ? total_biat : NAN;
+
                     //
                     mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
-                    mean_biat = total_bpackets > 1 ? total_biat / (total_bpackets - 1) : NAN;
+                    mean_biat = total_bpackets > 0 ? total_biat / (total_bpackets - 1) : NAN;
+                    //
+                    max_fiat = total_fpackets > 1 ? max_fiat : NAN;
+                    max_biat = total_bpackets > 1 ? max_biat : NAN;
+                    //
+                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -932,7 +990,13 @@ void *scanFlowIpv6TCP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    fprintf(csv, "TCP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                    
+                    std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
+                    std_fiat = total_fpackets > 1 ? std_fiat : NAN;
+                    std_biat = total_bpackets > 1 ? std_biat : NAN;
+                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
+                    fprintf(csv, "TCP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
                             ipv6_SCad.c_str(),
                             ipv6_DCad.c_str(),
                             ipv6_SCad.c_str(), ports.srcPort,
@@ -983,7 +1047,9 @@ void *scanFlowIpv6TCP(void *valor)
                             flow_ack,
                             flow_urg,
                             flow_cwr,
-                            flow_ece);
+                            flow_ece,
+                            (total_fpackets / (float)total_bpackets)
+                            );
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
@@ -1047,7 +1113,7 @@ void *scanFlowIpv6TCP(void *valor)
                     {
                         traficTipe = *(bffRawTrafic + (jump + 36));
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                        timestampPrev = timestampInit = timestampTemp;
+                        timestampPrev = timestampPrevForward = timestampInit = timestampTemp;
                         //extraccion de ip y puertos
                         for (size_t i = 0; i < 16; i++)
                         {
@@ -1069,8 +1135,6 @@ void *scanFlowIpv6TCP(void *valor)
                         //
                         min_fpktl = incl_leng;
                         //
-                        min_bpktl = incl_leng;
-                        //
                         max_fpktl = incl_leng;
                         //
                         vector_std_fpktl.push_back(incl_leng);
@@ -1082,12 +1146,6 @@ void *scanFlowIpv6TCP(void *valor)
                         mean_flowpktl = incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
-                        //
-                        min_fiat = timestampTemp;
-                        //
-                        min_biat = timestampTemp;
-                        //
-                        min_flowiat = timestampTemp;
                         //
                         calculateFlagsFlowv6();
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
@@ -1129,6 +1187,12 @@ void *scanFlowIpv6TCP(void *valor)
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
+                        iptTemp = timestampTemp - timestampPrevForward;
+                        if (!iatForwardState)
+                        {
+                            min_fiat = iptTemp;
+                            min_flowiat = iptTemp;
+                        }
                         total_fiat += iptTemp;
                         //
                         min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
@@ -1155,6 +1219,8 @@ void *scanFlowIpv6TCP(void *valor)
                         //
                         vector_std_flowiat.push_back(iptTemp);
                         //
+                        timestampPrevForward = timestampTemp;
+                        //
                         calculateFlagsFlowv6();
                         //marcar el paquete
                         mark(jump);
@@ -1169,22 +1235,45 @@ void *scanFlowIpv6TCP(void *valor)
                         iptTemp = timestampTemp - timestampPrev;
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
-                        //extraccion de caracteristicas en backward direccion
+                        
+                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
-                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
-                        total_biat += iptTemp;
+                        vector_std_flowiat.push_back(iptTemp);
                         //
-                        min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
-                        vector_std_biat.push_back(iptTemp);
+                        mean_flowiat += iptTemp;
+                        if (!iatBackwardState)
+                        {
+                            iatBackwardState = true;
+                            timestampPrevBackware = timestampTemp;
+                            min_bpktl = incl_leng;
+                            min_biat = timestampTemp;
+                        }
+                        else
+                        {
+                            iptTemp = timestampTemp - timestampPrevBackware;
+                            //
+                            total_biat += iptTemp;
+                            //
+                            min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                            //
+                            max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                            //
+                            vector_std_biat.push_back(iptTemp);
+                        }
+
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+                        timestampPrevBackware = timestampTemp;
                         //
                         calculateFlagsBackwardv6();
                         //
@@ -1195,14 +1284,6 @@ void *scanFlowIpv6TCP(void *valor)
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
-                        //
-                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
-                        //
-                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
-                        //
-                        mean_flowiat += iptTemp;
-                        //
-                        vector_std_flowiat.push_back(iptTemp);
                         //
                         calculateFlagsFlowv6();
                         //marcar el paquete
@@ -1225,6 +1306,7 @@ void *scanFlowIpv6TCP(void *valor)
     printf("fin de funcion");
     return NULL;
 }
+
 void *scanFlowIpv6UDP(void *valor)
 {
 
@@ -1249,13 +1331,25 @@ void *scanFlowIpv6UDP(void *valor)
                 {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                    min_bpktl = min_bpktl == 65535 ? 0 : min_bpktl;
+                     min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
-                    //min_biat = min_biat== 65536 ? 0 : min_biat;
+                    //
+                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_biat = total_bpackets > 1 ? min_biat : NAN;
+                    //
+                    total_fiat = total_fpackets > 1 ? total_fiat : NAN;
+                    total_biat = total_bpackets > 1 ? total_biat : NAN;
+
                     //
                     mean_fiat = ((float)total_fiat) / (total_fpackets - 1);
-                    mean_biat = total_bpackets > 1 ? total_biat / (total_bpackets - 1) : NAN;
+                    mean_biat = total_bpackets > 0 ? total_biat / (total_bpackets - 1) : NAN;
+                    //
+                    max_fiat = total_fpackets > 1 ? max_fiat : NAN;
+                    max_biat = total_bpackets > 1 ? max_biat : NAN;
+                    //
+                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -1265,7 +1359,13 @@ void *scanFlowIpv6UDP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                    
+                    std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
+                    std_fiat = total_fpackets > 1 ? std_fiat : NAN;
+                    std_biat = total_bpackets > 1 ? std_biat : NAN;
+                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
+                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
                             ipv6_SCad.c_str(),
                             ipv6_DCad.c_str(),
                             ipv6_SCad.c_str(), ports.srcPort,
@@ -1297,8 +1397,8 @@ void *scanFlowIpv6UDP(void *valor)
                             bpsh_cnt,
                             furg_cnt,
                             burg_cnt,
-                            (total_fpackets / (timestampPrev - timestampInit)),
-                            (total_bpackets / (timestampPrev - timestampInit)),
+                            (total_fpackets / (float)(timestampPrev - timestampInit)),
+                            (total_bpackets / (float)(timestampPrev - timestampInit)),
                             ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)),
                             ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)),
                             min_flowpktl,
@@ -1316,12 +1416,16 @@ void *scanFlowIpv6UDP(void *valor)
                             flow_ack,
                             flow_urg,
                             flow_cwr,
-                            flow_ece);
+                            flow_ece,
+                            (total_fpackets / (float)total_bpackets)
+                            );
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
-                    //printf("Timestamp%f\n",timestampInit);
-                    //printf("Timestamp%f\n",timestampPrev);
+                    //printf("Timestamp->init: %.20f\n",timestampInit);
+                    //printf("Timestamp->prev: %f\n",timestampPrev);
+                    //printf("resultado:%.20f\n", (timestampPrev-timestampInit));
+                    //printf("total de paquete f:%d\n",total_fpackets);
                     // printf("time sesion: %f\n",(timestampPrev-timestampInit));
                 }
 
@@ -1365,7 +1469,7 @@ void *scanFlowIpv6UDP(void *valor)
                     timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
                 }
 
-                //check if ipv4
+                //check if ipv6
                 if ((*(bffRawTrafic + (jump + 28)) << 8 | *(bffRawTrafic + (jump + 29))) == _IPV6)
                 {
 
@@ -1378,7 +1482,7 @@ void *scanFlowIpv6UDP(void *valor)
                     {
                         traficTipe = *(bffRawTrafic + (jump + 36));
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
-                        timestampPrev = timestampInit = timestampTemp;
+                        timestampPrev = timestampPrevForward = timestampInit = timestampTemp;
                         //extraccion de ip y puertos
                         for (size_t i = 0; i < 16; i++)
                         {
@@ -1400,8 +1504,6 @@ void *scanFlowIpv6UDP(void *valor)
                         //
                         min_fpktl = incl_leng;
                         //
-                        min_bpktl = incl_leng;
-                        //
                         max_fpktl = incl_leng;
                         //
                         vector_std_fpktl.push_back(incl_leng);
@@ -1411,12 +1513,6 @@ void *scanFlowIpv6UDP(void *valor)
                         mean_flowpktl = incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
-                        //
-                        min_fiat = timestampTemp;
-                        //
-                        min_biat = timestampTemp;
-                        //
-                        min_flowiat = timestampTemp;
                         //
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
@@ -1457,6 +1553,12 @@ void *scanFlowIpv6UDP(void *valor)
                         //
                         vector_std_fpktl.push_back(incl_leng);
                         //
+                        iptTemp = timestampTemp - timestampPrevForward;
+                        if (!iatForwardState)
+                        {
+                            min_fiat = iptTemp;
+                            min_flowiat = iptTemp;
+                        }
                         total_fiat += iptTemp;
                         //
                         min_fiat = iptTemp < min_fiat ? iptTemp : min_fiat;
@@ -1480,6 +1582,8 @@ void *scanFlowIpv6UDP(void *valor)
                         mean_flowiat += iptTemp;
                         //
                         vector_std_flowiat.push_back(iptTemp);
+                        //
+                        timestampPrevForward = timestampTemp;
                         //marcar el paquete
                         mark(jump);
                     }
@@ -1493,22 +1597,45 @@ void *scanFlowIpv6UDP(void *valor)
                         iptTemp = timestampTemp - timestampPrev;
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
-                        //extraccion de caracteristicas en backward direccion
+                        
+                         //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += incl_leng;
                         //
-                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
-                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+
                         //
                         vector_std_bpktl.push_back(incl_leng);
                         //
-                        total_biat += iptTemp;
+                        vector_std_flowiat.push_back(iptTemp);
                         //
-                        min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
-                        max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
                         //
-                        vector_std_biat.push_back(iptTemp);
+                        mean_flowiat += iptTemp;
+                        if (!iatBackwardState)
+                        {
+                            iatBackwardState = true;
+                            timestampPrevBackware = timestampTemp;
+                            min_bpktl = incl_leng;
+                            min_biat = timestampTemp;
+                        }
+                        else
+                        {
+                            iptTemp = timestampTemp - timestampPrevBackware;
+                            //
+                            total_biat += iptTemp;
+                            //
+                            min_biat = iptTemp < min_biat ? iptTemp : min_biat;
+                            //
+                            max_biat = iptTemp > max_biat ? iptTemp : max_biat;
+                            //
+                            vector_std_biat.push_back(iptTemp);
+                        }
+
+                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
+                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+                        timestampPrevBackware = timestampTemp;
                         //
                         min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
                         //
@@ -1517,15 +1644,6 @@ void *scanFlowIpv6UDP(void *valor)
                         mean_flowpktl += incl_leng;
                         //
                         vector_std_flowpktl.push_back(incl_leng);
-                        //
-                        min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
-                        //
-                        max_flowiat = iptTemp > max_flowiat ? iptTemp : max_flowiat;
-                        //
-                        mean_flowiat += iptTemp;
-                        //
-                        vector_std_flowiat.push_back(iptTemp);
-                        //
                         //marcar el paquete
                         mark(jump);
                     }

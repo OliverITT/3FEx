@@ -1,12 +1,4 @@
-//#include <iostream>
-//#include <fstream>
-//#include <stdint.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include "structs.h"
 #include "functions.h"
-//#include <type_traits>
-//using namespace std;
 
 char *fileTrafic;
 char *fileFeatures;
@@ -63,8 +55,8 @@ int main(int argc, char **argv)
 
     fclose(raw);
     fclose(alertT);
-    pthread_t hilo0, hilo1,hilo2,hilo3;
-    int u = 1, p = 2, o=3, r=4;;
+    pthread_t hilo0;
+    int u = 1;
     pthread_mutex_init(&mutex, NULL);
 
     pthread_mutex_lock(&mutex);
@@ -72,13 +64,7 @@ int main(int argc, char **argv)
     pthread_mutex_unlock(&mutex);
 
     pthread_create(&hilo0, NULL, scanFlowIpv4TCP, (void *)&u);
-    pthread_create(&hilo1, NULL, scanFlowIpv4UDP, (void *)&p);
-    pthread_create(&hilo2, NULL, scanFlowIpv6TCP, (void *)&o);
-    pthread_create(&hilo3, NULL, scanFlowIpv6UDP, (void *)&r);
     pthread_join(hilo0, NULL);
-    pthread_join(hilo1, NULL);
-    pthread_join(hilo2, NULL);
-    pthread_join(hilo3, NULL);
 
     fclose(csv);
     fclose(ipts);

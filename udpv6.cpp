@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     printf("bytes raw trafic: %" PRId64 "\n", pointerbffRawTrafic);
 
     fclose(raw);
-    fclose(alertT);
+    //fclose(alertT);
     pthread_t hilo0;
     int u = 1;
     pthread_mutex_init(&mutex, NULL);

@@ -1463,6 +1463,7 @@ void *scanFlowIpv6UDP(void *valor)
 
                 //
                 incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
+                orig_len = (*(bffRawTrafic + (jump + 15)) << 24 | *(bffRawTrafic + (jump + 14)) << 16 | *(bffRawTrafic + (jump + 13)) << 8 | *(bffRawTrafic + (jump + 12)));
                 timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
 
                 //busca paquetes distintos de cero
@@ -1475,6 +1476,7 @@ void *scanFlowIpv6UDP(void *valor)
                     jump += incl_leng + 16;
 
                     incl_leng = (*(bffRawTrafic + (jump + 11)) << 24 | *(bffRawTrafic + (jump + 10)) << 16 | *(bffRawTrafic + (jump + 9)) << 8 | *(bffRawTrafic + (jump + 8)));
+                    orig_len = (*(bffRawTrafic + (jump + 15)) << 24 | *(bffRawTrafic + (jump + 14)) << 16 | *(bffRawTrafic + (jump + 13)) << 8 | *(bffRawTrafic + (jump + 12)));
                     timestampTemp = *(bffRawTrafic + jump + 3) << 24 | *(bffRawTrafic + jump + 2) << 16 | *(bffRawTrafic + jump + 1) << 8 | *(bffRawTrafic + jump);
                 }
 
@@ -1509,19 +1511,19 @@ void *scanFlowIpv6UDP(void *valor)
                         ports.dstPort = *(bffRawTrafic + jump + 72) << 8 | *(bffRawTrafic + jump + 73);
                         //extraccion de featurs forward direccion primer paquete encontrado de la sesion a scanear
                         total_fpackets++;
-                        total_fpktl = incl_leng;
+                        total_fpktl = orig_len;
                         //
-                        min_fpktl = incl_leng;
+                        min_fpktl = orig_len;
                         //
-                        max_fpktl = incl_leng;
+                        max_fpktl = orig_len;
                         //
-                        vector_std_fpktl.push_back(incl_leng);
+                        vector_std_fpktl.push_back(orig_len);
                         //
-                        min_flowpktl = max_flowpktl = incl_leng;
+                        min_flowpktl = max_flowpktl = orig_len;
                         //
-                        mean_flowpktl = incl_leng;
+                        mean_flowpktl = orig_len;
                         //
-                        vector_std_flowpktl.push_back(incl_leng);
+                        vector_std_flowpktl.push_back(orig_len);
                         //
                         //marca el paquete time stamp segundo en 0 para indicar que ya fue procesado ese paquete
                         mark(jump);
@@ -1555,12 +1557,12 @@ void *scanFlowIpv6UDP(void *valor)
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
-                        total_fpktl += incl_leng;
+                        total_fpktl += orig_len;
                         //
-                        min_fpktl = incl_leng < min_fpktl ? incl_leng : min_fpktl;
-                        max_fpktl = incl_leng > max_fpktl ? incl_leng : max_fpktl;
+                        min_fpktl = orig_len < min_fpktl ? orig_len : min_fpktl;
+                        max_fpktl = orig_len > max_fpktl ? orig_len : max_fpktl;
                         //
-                        vector_std_fpktl.push_back(incl_leng);
+                        vector_std_fpktl.push_back(orig_len);
                         //
                         iptTemp = timestampTemp - timestampPrevForward;
                         if (!iatForwardState)
@@ -1576,13 +1578,13 @@ void *scanFlowIpv6UDP(void *valor)
                         //
                         vector_std_fiat.push_back(iptTemp);
                         //
-                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
+                        min_flowpktl = orig_len < min_flowpktl ? orig_len : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
+                        max_flowpktl = orig_len > max_flowpktl ? orig_len : max_flowpktl;
                         //
-                        mean_flowpktl += incl_leng;
+                        mean_flowpktl += orig_len;
                         //
-                        vector_std_flowpktl.push_back(incl_leng);
+                        vector_std_flowpktl.push_back(orig_len);
                         //
                         min_flowiat = iptTemp < min_flowiat ? iptTemp : min_flowiat;
                         //
@@ -1609,11 +1611,11 @@ void *scanFlowIpv6UDP(void *valor)
                         
                          //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
-                        total_bpktl += incl_leng;
+                        total_bpktl += orig_len;
                         //
 
                         //
-                        vector_std_bpktl.push_back(incl_leng);
+                        vector_std_bpktl.push_back(orig_len);
                         //
                         vector_std_flowiat.push_back(iptTemp);
                         //
@@ -1626,7 +1628,7 @@ void *scanFlowIpv6UDP(void *valor)
                         {
                             iatBackwardState = true;
                             timestampPrevBackware = timestampTemp;
-                            min_bpktl = incl_leng;
+                            min_bpktl = orig_len;
                             min_biat = timestampTemp;
                         }
                         else
@@ -1642,17 +1644,17 @@ void *scanFlowIpv6UDP(void *valor)
                             vector_std_biat.push_back(iptTemp);
                         }
 
-                        min_bpktl = incl_leng < min_bpktl ? incl_leng : min_bpktl;
-                        max_bpktl = incl_leng > max_bpktl ? incl_leng : max_bpktl;
+                        min_bpktl = orig_len < min_bpktl ? orig_len : min_bpktl;
+                        max_bpktl = orig_len > max_bpktl ? orig_len : max_bpktl;
                         timestampPrevBackware = timestampTemp;
                         //
-                        min_flowpktl = incl_leng < min_flowpktl ? incl_leng : min_flowpktl;
+                        min_flowpktl = orig_len < min_flowpktl ? orig_len : min_flowpktl;
                         //
-                        max_flowpktl = incl_leng > max_flowpktl ? incl_leng : max_flowpktl;
+                        max_flowpktl = orig_len > max_flowpktl ? orig_len : max_flowpktl;
                         //
-                        mean_flowpktl += incl_leng;
+                        mean_flowpktl += orig_len;
                         //
-                        vector_std_flowpktl.push_back(incl_leng);
+                        vector_std_flowpktl.push_back(orig_len);
                         //marcar el paquete
                         mark(jump);
                     }

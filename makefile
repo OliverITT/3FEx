@@ -1,12 +1,20 @@
 all:
+	make compile
+	make run
+	
+compile:
 	clear
 	g++ generador.cpp -o generador -lpthread
 	g++ tcpv4.cpp -o tcpv4 -lpthread
 	g++ udpv4.cpp -o udpv4 -lpthread
 	g++ tcpv6.cpp -o tcpv6 -lpthread
 	g++ udpv6.cpp -o udpv6 -lpthread
+
+run:
 	#./generador prueba.pcap malo.pcap hola.csv holaipts.txt
 	#./generador prueba.pcap hola.csv holaipts.txt
+	#./generador tftp_rrq.pcap hola.csv holaipts.txt
+	./generador nb6-http.pcap hola.csv holaipts.txt
 	#./generador sesioncompleta1.pcap malo.pcap hola.csv holaipts.txt
 	#/generador tcpdump1.out hola.csv holaipts.txt
 	#./generador idprueba.pcap hola.csv holaipts.txt

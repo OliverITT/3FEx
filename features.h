@@ -129,7 +129,8 @@ uint32_t flow_ece = 0; // Number of packets with ECE
             "label",                # Classification Label
             */
 //vars control
-uint32_t incl_leng = 0; //size of packet
+uint32_t incl_leng = 0; /* number of octets of packet saved in file */
+uint32_t orig_len =0; /* actual length of packet */
 uint64_t jump = 0;
 uint64_t traficPointer = 0;
 uint8_t traficTipe = 0;
@@ -239,6 +240,7 @@ void resetVar()
         */
     //vars control
     incl_leng = 0;
+    orig_len =0;
     //jump = 0;
     traficTipe = 0;
 

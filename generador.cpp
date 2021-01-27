@@ -60,9 +60,9 @@ int main(int argc, char **argv)
     bffRawTrafic = new unsigned char[pointerbffRawTrafic];
     pointerbffRawTrafic = fread(bffRawTrafic, sizeof(unsigned char), pointerbffRawTrafic, raw);
     printf("bytes raw trafic: %" PRId64 "\n", pointerbffRawTrafic);
-
-    fclose(raw);
-    fclose(alertT);
+    
+    if(raw){fclose(raw);}
+    if(alertT){fclose(alertT);}
     pthread_t hilo0, hilo1,hilo2,hilo3;
     int u = 1, p = 2, o=3, r=4;;
     pthread_mutex_init(&mutex, NULL);

@@ -19,6 +19,14 @@
 #define _ACK 0x10
 #define _CWE 0x80
 #define _ECE 0x40
+enum
+{
+    IPV4_TCP = 0,
+    IPV4_UDP,
+    IPV6_TCP,
+    IPV6_UDP,
+    OTDER_TRAFIC
+};
 
 unsigned char *bffRawTrafic;
 unsigned char *bffAlertTrafic;
@@ -132,8 +140,8 @@ typedef struct Packet_pcap
         TCPheader tcpHeader;
         UDPheader uDPheader;
     } proto;
-    uint16_t ip_tipe;
-    uint8_t protocol;
+    uint8_t tipe;
+    uint8_t *payload;
 } Packet_pcap_t;
 
 struct ipv4cast

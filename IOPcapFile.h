@@ -60,6 +60,7 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
 
             default:
                 //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 20), SEEK_CUR);
+                packet_pcap->tipe = IPV4_OTDER_PROTO;
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 20)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20), &FileTrafic))
                 {
@@ -69,10 +70,11 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
             }
             break;
         case __IPV6:
-            if (!fread(&packet_pcap->ip_layer.ipv6Header, sizeof(Ipv6Header), 1, &FileTrafic))
+            if (!fread(&packet_pcap->ip_layer.ipv6Header, sizeof(Ipv6Header) -8, 1, &FileTrafic))
             {
                 return NULL;
             }
+
             switch (packet_pcap->ip_layer.ipv6Header.nextHeader)
             {
             case _TCP:
@@ -104,6 +106,7 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
 
             default:
                 //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 40), SEEK_CUR);
+                packet_pcap->tipe = IPV6_OTDER_PROTO;
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40), &FileTrafic))
                 {
@@ -132,6 +135,12 @@ void writePacket(FILE &FileTrafic, Packet_pcap *&packet_pcap, ...)
 
     switch (packet_pcap->tipe)
     {
+    case IPV4_OTDER_PROTO:
+        fwrite(&packet_pcap->packetHeader, sizeof(PcapPackHeader), 1, &FileTrafic);
+        fwrite(&packet_pcap->ethernetHeader, sizeof(EtherHeader), 1, &FileTrafic);
+        fwrite(&packet_pcap->ip_layer.ipv4Header, sizeof(Ipv4Header), 1, &FileTrafic);
+        fwrite(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20), &FileTrafic);
+        break;
     case IPV4_TCP:
         fwrite(&packet_pcap->packetHeader, sizeof(PcapPackHeader), 1, &FileTrafic);
         fwrite(&packet_pcap->ethernetHeader, sizeof(EtherHeader), 1, &FileTrafic);
@@ -146,17 +155,23 @@ void writePacket(FILE &FileTrafic, Packet_pcap *&packet_pcap, ...)
         fwrite(&packet_pcap->proto.uDPheader, sizeof(UDPheader), 1, &FileTrafic);
         fwrite(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20 - 8), &FileTrafic);
         break;
+    case IPV6_OTDER_PROTO:
+        fwrite(&packet_pcap->packetHeader, sizeof(PcapPackHeader), 1, &FileTrafic);
+        fwrite(&packet_pcap->ethernetHeader, sizeof(EtherHeader), 1, &FileTrafic);
+        fwrite(&packet_pcap->ip_layer.ipv4Header, sizeof(Ipv6Header) -8, 1, &FileTrafic);
+        fwrite(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40), &FileTrafic);
+        break;
     case IPV6_TCP:
         fwrite(&packet_pcap->packetHeader, sizeof(PcapPackHeader), 1, &FileTrafic);
         fwrite(&packet_pcap->ethernetHeader, sizeof(EtherHeader), 1, &FileTrafic);
-        fwrite(&packet_pcap->ip_layer.ipv6Header, sizeof(Ipv6Header), 1, &FileTrafic);
+        fwrite(&packet_pcap->ip_layer.ipv6Header, sizeof(Ipv6Header) -8, 1, &FileTrafic);
         fwrite(&packet_pcap->proto.tcpHeader, sizeof(TCPheader), 1, &FileTrafic);
         fwrite(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40 - 20), &FileTrafic);
         break;
     case IPV6_UDP:
         fwrite(&packet_pcap->packetHeader, sizeof(PcapPackHeader), 1, &FileTrafic);
         fwrite(&packet_pcap->ethernetHeader, sizeof(EtherHeader), 1, &FileTrafic);
-        fwrite(&packet_pcap->ip_layer.ipv6Header, sizeof(Ipv6Header), 1, &FileTrafic);
+        fwrite(&packet_pcap->ip_layer.ipv6Header, sizeof(Ipv6Header) -8, 1, &FileTrafic);
         fwrite(&packet_pcap->proto.uDPheader, sizeof(UDPheader), 1, &FileTrafic);
         fwrite(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40 - 8), &FileTrafic);
         break;
@@ -173,7 +188,7 @@ void readHeaderPcapFile(FILE &FileTrafic, PacapFileHeader *&pacapFileHeader)
     pacapFileHeader = new PacapFileHeader;
     fread(pacapFileHeader, sizeof(PacapFileHeader), 1, &FileTrafic);
 }
-void writeHeaderPcapFile(FILE &FileTrafic,PacapFileHeader *&pacapFileHeader)
+void writeHeaderPcapFile(FILE &FileTrafic, PacapFileHeader *&pacapFileHeader)
 {
     fwrite(pacapFileHeader, sizeof(PacapFileHeader), 1, &FileTrafic);
 }

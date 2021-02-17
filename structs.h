@@ -19,10 +19,19 @@
 #define _ACK 0x10
 #define _CWE 0x80
 #define _ECE 0x40
+#define uint128_t __uint128_t
+//#define uint128_t unsigned __int128
+
+#ifdef __SIZEOF_INT128__
+int detected_ok() { return 1; }
+#endif
+
 enum
 {
-    IPV4_TCP = 0,
+    IPV4_OTDER_PROTO = 0,
+    IPV4_TCP,
     IPV4_UDP,
+    IPV6_OTDER_PROTO,
     IPV6_TCP,
     IPV6_UDP,
     OTDER_TRAFIC
@@ -93,8 +102,10 @@ typedef struct Ipv6Header
     uint16_t payloadLength;
     uint8_t nextHeader;
     uint8_t hopLimit;
-    uint8_t ip_shost[16];
-    uint8_t ip_dhost[16];
+    __uint128_t ip_shost;
+    __uint128_t ip_dhost;
+    // uint8_t ip_shost[16];
+    // uint8_t ip_dhost[16];
 } Ipv6Header_t;
 
 typedef struct TCPheader

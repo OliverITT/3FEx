@@ -240,7 +240,7 @@ void *scanFlowIpv4TCP(void *valor)
 {
     //yield();
     pthread_mutex_lock(&mutex); //Inicio SC
-    printf("hilo->%d\n", *(int *)valor);
+    printf("thread->%d\n", *(int *)valor);
     resetVar();
     jump = 0;
 
@@ -348,7 +348,7 @@ void *scanFlowIpv4TCP(void *valor)
                             flow_ece,
                             (total_fpackets / (float)total_bpackets));
                     fprintf(ipts, "%s\n", iptsCad.c_str());
-                    //printf("srcport:%u",ports.srcPort);
+                    printf("srcport:%x\t ip: %x\n",ports.srcPort,ip_shost);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
                     //printf("Timestamp%f\n",timestampInit);
                     //printf("Timestamp%f\n",timestampPrev);
@@ -599,7 +599,7 @@ void *scanFlowIpv4UDP(void *valor)
     pthread_mutex_lock(&mutex); //Inicio SC
     resetVar();
     jump = 0;  //yield();
-    printf("hilo->%d\n", *(int *)valor);
+    printf("thread->%d\n", *(int *)valor);
     
     while (true)
     {
@@ -949,7 +949,7 @@ void *scanFlowIpv6TCP(void *valor)
 
     //yield();
     pthread_mutex_lock(&mutex); //Inicio SC
-    printf("hilo->%d\n", *(int *)valor);
+    printf("thread->%d\n", *(int *)valor);
     resetVar();
     jump = 0;
 
@@ -1321,7 +1321,7 @@ void *scanFlowIpv6UDP(void *valor)
 
     //yield();
     pthread_mutex_lock(&mutex); //Inicio SC
-    printf("hilo->%d\n", *(int *)valor);
+    printf("thread->%d\n", *(int *)valor);
     resetVar();
     jump = 0;
 

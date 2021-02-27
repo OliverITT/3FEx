@@ -2,7 +2,6 @@
 #define READ_PCAP_FILE
 #include "structs.h"
 #include <stdio.h>
-#include <iostream>
 
 void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
 {
@@ -37,7 +36,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV4_TCP;
-                //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 40), SEEK_CUR);
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40), &FileTrafic))
                 {
@@ -50,7 +48,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV4_UDP;
-                //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 20 - 8), SEEK_CUR);
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 20 - 8)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20 - 8), &FileTrafic))
                 {
@@ -59,7 +56,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                 break;
 
             default:
-                //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 20), SEEK_CUR);
                 packet_pcap->tipe = IPV4_OTDER_PROTO;
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 20)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20), &FileTrafic))
@@ -83,7 +79,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV6_TCP;
-                //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 40 - 20), SEEK_CUR);
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40 - 20)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40 - 20), &FileTrafic))
                 {
@@ -96,7 +91,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV6_UDP;
-                //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 40 - 8), SEEK_CUR);
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40 - 8)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40 - 8), &FileTrafic))
                 {
@@ -105,7 +99,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                 break;
 
             default:
-                //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14 - 40), SEEK_CUR);
                 packet_pcap->tipe = IPV6_OTDER_PROTO;
                 packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40)];
                 if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40), &FileTrafic))
@@ -116,7 +109,6 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
             }
             break;
         default:
-            //fseek(&FileTrafic, (packet_pcap->packetHeader.incl_len - 14), SEEK_CUR);
             packet_pcap->tipe = OTDER_TRAFIC;
             packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14)];
             if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14), &FileTrafic))

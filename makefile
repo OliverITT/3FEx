@@ -13,7 +13,7 @@ compile:
 run:
 	#./generador prueba.pcap malo.pcap hola.csv holaipts.txt
 	#./generador prueba.pcap hola.csv holaipts.txt
-	./generador tftp_rrq.pcap hola.csv holaipts.txt
+	#./generador tftp_rrq.pcap hola.csv holaipts.txt
 	#./generador nb6-http.pcap hola.csv holaipts.txt
 	#./generador sesioncompleta1.pcap malo.pcap hola.csv holaipts.txt
 	#/generador tcpdump1.out hola.csv holaipts.txt

@@ -103,10 +103,10 @@ typedef struct Ipv6Header
     uint16_t payloadLength;
     uint8_t nextHeader;
     uint8_t hopLimit;
-    __uint128_t ip_shost;
-    __uint128_t ip_dhost;
-    // uint8_t ip_shost[16];
-    // uint8_t ip_dhost[16];
+    // __uint128_t ip_shost;
+    // __uint128_t ip_dhost;
+    uint8_t ip_shost[16];
+    uint8_t ip_dhost[16];
 } Ipv6Header_t;
 
 typedef struct TCPheader
@@ -161,7 +161,7 @@ typedef struct Packet_pcap
     std::string *to_string()
     {
         std::string *ip_proto = new std::string;
-        char buffer[9];
+        char buffer[17];
         switch (tipe)
         {
         case IPV4_TCP:
@@ -187,13 +187,92 @@ typedef struct Packet_pcap
             break;
         case IPV6_TCP:
             /* code */
+            sprintf(buffer, "%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x",
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[0]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[1]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[2]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[3]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[4]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[5]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[6]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[7]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[8]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[9]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[10]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[11]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[12]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[13]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[14]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[15]));
+            *ip_proto = buffer;
+            sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.dstPort >> 8) | (proto.tcpHeader.dstPort << 8)));
+            *ip_proto += buffer;
+            sprintf(buffer, "%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x",
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[0]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[1]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[2]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[3]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[4]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[5]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[6]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[7]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[8]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[9]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[10]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[11]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[12]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[13]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[14]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[15]));
+            *ip_proto += buffer;
+            sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.srcPort >> 8) | (proto.tcpHeader.srcPort << 8)));
+            *ip_proto += buffer;
             break;
         case IPV6_UDP:
             /* code */
+            sprintf(buffer, "%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x",
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[0]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[1]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[2]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[3]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[4]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[5]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[6]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[7]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[8]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[9]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[10]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[11]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[12]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[13]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[14]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_dhost[15]));
+            *ip_proto = buffer;
+            sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.dstPort >> 8) | (proto.uDPheader.dstPort << 8)));
+            *ip_proto += buffer;
+            sprintf(buffer, "%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x",
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[0]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[1]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[2]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[3]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[4]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[5]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[6]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[7]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[8]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[9]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[10]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[11]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[12]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[13]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[14]),
+                    (uint8_t)(ip_layer.ipv6Header.ip_shost[15]));
+            *ip_proto += buffer;
+            sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.srcPort >> 8) | (proto.uDPheader.srcPort << 8)));
+            *ip_proto += buffer;
             break;
-
         default:
-            return ip_proto;
+            *ip_proto = std::to_string(tipe);
             break;
         }
         return ip_proto;

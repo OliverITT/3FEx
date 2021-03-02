@@ -13,9 +13,19 @@
 
 // data["5d119cfa:50->afb178b:81ae"] = 'Tipetrafic';
 std::map<std::string, uint8_t> data;
-std::map<std::string, uint8_t>::iterator it;
-
-static void readBadTrafic(FILE &badTrafic)
+std::map<std::string, uint8_t>::iterator it_;
+bool isBadTrafic(std::string ip_proto, uint8_t tipe)
+{
+    std::map<std::string, uint8_t>::iterator it;
+    it = data.find(ip_proto);
+    // printf("bad: %s\n",ip_proto.c_str());
+    if (it != data.end() && it->second == tipe && it->first.size() > 5)
+    {
+        return true;
+    }
+    return false;
+}
+void readBadTrafic(FILE &badTrafic)
 {
     Packet_pcap *packet_pcap; // = new Packet_pcap;
     while (getNextPacket(badTrafic, packet_pcap))
@@ -24,40 +34,38 @@ static void readBadTrafic(FILE &badTrafic)
     }
     delete packet_pcap;
 }
+void splitBadTrafic(FILE &rawTrafic, FILE &badTrafic, FILE &freeAnomaliTrafic)
+{
+    PacapFileHeader *fileHeader;
+    readHeaderPcapFile(rawTrafic, fileHeader);
+    writeHeaderPcapFile(freeAnomaliTrafic, fileHeader);
+    readBadTrafic(badTrafic);
+    Packet_pcap *packete; // = new Packet_pcap();
+    while (getNextPacket(rawTrafic, packete))
+    {
+
+        if (!isBadTrafic(*packete->to_string(), packete->tipe))
+        {
+            writePacket(freeAnomaliTrafic, packete);
+        }
+    }
+    delete fileHeader;
+    delete packete;
+}
 #endif
 int main(int argc, char **argv)
 {
-    FILE *badTrafic = fopen(argv[1], "rb");
-    FILE *OTrafic = fopen(argv[2], "wb");
+    FILE *rawTrafic = fopen(argv[1], "rb");
+    FILE *badTrafic = fopen(argv[2], "rb");
+    FILE *feetrafic = fopen(argv[3], "wb");
     if (!badTrafic)
     {
         return 1;
     }
 
-    PacapFileHeader *fileHeader;
-    readHeaderPcapFile(*badTrafic, fileHeader);
-    writeHeaderPcapFile(*OTrafic, fileHeader);
-    Packet_pcap *packete = new Packet_pcap();
-    /*
-    int cont = 0;
-         while (getNextPacket(*badTrafic, packete))
+    splitBadTrafic(*rawTrafic, *badTrafic, *feetrafic);
+    for (it_ = data.begin(); it_ != data.end(); ++it_)
     {
-        cont++;
-        if (packete->tipe == OTDER_TRAFIC)
-        {
-            printf("tipstap:%d\n", packete->packetHeader.ts_usec);
-        }
-        if (packete->tipe == IPV4_TCP)
-        {
-            printf("ip:%s\n", packet_to_string(packete)->c_str());
-        }
-        writePacket(*OTrafic, packete);
-    } */
-
-    readBadTrafic(*badTrafic);
-    for (it = data.begin(); it != data.end(); ++it)
-    {
-        printf("%s,%d\n", it->first.c_str(), it->second);
+        printf("%s,%d\n", it_->first.c_str(), it_->second);
     }
-    return 0;
 }

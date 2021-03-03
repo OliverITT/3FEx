@@ -4,6 +4,7 @@
 #include "features.h"
 #include <inttypes.h>
 #include <math.h>
+#include "scanBadTrafic.h"
 
 FILE *raw, *csv, *ipts, *alertT;
 

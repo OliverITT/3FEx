@@ -35,8 +35,8 @@ int main(int argc, char **argv)
         printf("problemas con archivo csv");
     }
 
-    PacapFileHeader fileheader;
-    if (!fread(&fileheader, sizeof(PacapFileHeader), 1, raw))
+    PcapFileHeader fileheader;
+    if (!fread(&fileheader, sizeof(PcapFileHeader), 1, raw))
     {
         printf("unknown file");
         return 0;

@@ -13,12 +13,11 @@
 
 // data["5d119cfa:50->afb178b:81ae"] = 'Tipetrafic';
 std::map<std::string, uint8_t> data;
-std::map<std::string, uint8_t>::iterator it_;
+// std::map<std::string, uint8_t>::iterator it_;
 bool isBadTrafic(std::string ip_proto, uint8_t tipe)
 {
     std::map<std::string, uint8_t>::iterator it;
     it = data.find(ip_proto);
-    // printf("bad: %s\t%d\n",ip_proto.c_str(),tipe);
     if (it != data.end() && it->second == tipe && it->first.size() > 5)
     {
         return true;
@@ -36,7 +35,7 @@ void readBadTrafic(FILE &badTrafic)
 }
 void splitBadTrafic(FILE &rawTrafic, FILE &badTrafic, FILE &freeAnomaliTrafic)
 {
-    PacapFileHeader *fileHeader;
+    PcapFileHeader *fileHeader;
     readHeaderPcapFile(rawTrafic, fileHeader);
     writeHeaderPcapFile(freeAnomaliTrafic, fileHeader);
     readBadTrafic(badTrafic);

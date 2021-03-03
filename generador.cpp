@@ -28,23 +28,27 @@ int main(int argc, char **argv)
         fileFeatures = *(argv + 3);
         fileIpts = *(argv + 4);
         alertT = fopen(alertTrafic, "rb");
+        /*
         fseek(alertT, 0L, SEEK_END);
         pointerbffAlertTrafic = ftell(alertT) - 24;
         fseek(alertT, 24L, SEEK_SET);
         bffAlertTrafic = new unsigned char[pointerbffAlertTrafic];
         pointerbffAlertTrafic = fread(bffAlertTrafic, sizeof(unsigned char), pointerbffAlertTrafic, alertT);
         printf("bytes alert trafic: %" PRId64 "\n", pointerbffAlertTrafic);
+        */
+        readBadTrafic(*alertT);
     }
 
     raw = fopen(fileTrafic, "rb");
     csv = fopen(fileFeatures, "w");
     ipts = fopen(fileIpts, "w");
-    if(!ipts){
+    if (!ipts)
+    {
         printf("problemas con archivo csv");
     }
 
-    PacapFileHeader fileheader;
-    if (!fread(&fileheader, sizeof(PacapFileHeader), 1, raw))
+    PcapFileHeader fileheader;
+    if (!fread(&fileheader, sizeof(PcapFileHeader), 1, raw))
     {
         printf("unknown file");
         return 0;
@@ -60,11 +64,18 @@ int main(int argc, char **argv)
     bffRawTrafic = new unsigned char[pointerbffRawTrafic];
     pointerbffRawTrafic = fread(bffRawTrafic, sizeof(unsigned char), pointerbffRawTrafic, raw);
     printf("bytes raw trafic: %" PRId64 "\n", pointerbffRawTrafic);
-    
-    if(raw){fclose(raw);}
-    if(alertT){fclose(alertT);}
-    pthread_t hilo0, hilo1,hilo2,hilo3;
-    int u = 1, p = 2, o=3, r=4;;
+
+    if (raw)
+    {
+        fclose(raw);
+    }
+    if (alertT)
+    {
+        fclose(alertT);
+    }
+    pthread_t hilo0, hilo1, hilo2, hilo3;
+    int u = 1, p = 2, o = 3, r = 4;
+    ;
     pthread_mutex_init(&mutex, NULL);
 
     pthread_mutex_lock(&mutex);

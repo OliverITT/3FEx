@@ -18,7 +18,7 @@ bool isBadTrafic(std::string ip_proto, uint8_t tipe)
 {
     std::map<std::string, uint8_t>::iterator it;
     it = data.find(ip_proto);
-    // printf("bad: %s\n",ip_proto.c_str());
+    // printf("bad: %s\t%d\n",ip_proto.c_str(),tipe);
     if (it != data.end() && it->second == tipe && it->first.size() > 5)
     {
         return true;
@@ -53,19 +53,3 @@ void splitBadTrafic(FILE &rawTrafic, FILE &badTrafic, FILE &freeAnomaliTrafic)
     delete packete;
 }
 #endif
-int main(int argc, char **argv)
-{
-    FILE *rawTrafic = fopen(argv[1], "rb");
-    FILE *badTrafic = fopen(argv[2], "rb");
-    FILE *feetrafic = fopen(argv[3], "wb");
-    if (!badTrafic)
-    {
-        return 1;
-    }
-
-    splitBadTrafic(*rawTrafic, *badTrafic, *feetrafic);
-    for (it_ = data.begin(); it_ != data.end(); ++it_)
-    {
-        printf("%s,%d\n", it_->first.c_str(), it_->second);
-    }
-}

@@ -4,11 +4,12 @@ all:
 	
 compile:
 	clear
-	g++ generador.cpp -o generador -lpthread
-	g++ tcpv4.cpp -o tcpv4 -lpthread
-	g++ udpv4.cpp -o udpv4 -lpthread
-	g++ tcpv6.cpp -o tcpv6 -lpthread
-	g++ udpv6.cpp -o udpv6 -lpthread
+	g++ generador.cpp -o generador.x -lpthread
+	g++ tcpv4.cpp -o tcpv4.x -lpthread
+	g++ udpv4.cpp -o udpv4.x -lpthread
+	g++ tcpv6.cpp -o tcpv6.x -lpthread
+	g++ udpv6.cpp -o udpv6.x -lpthread
+	g++ splitTrafic.cpp -o splitTrafic.x    
 
 run:
 	#./generador prueba.pcap malo.pcap hola.csv holaipts.txt

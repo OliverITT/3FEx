@@ -13,13 +13,9 @@ compile:
 
 run:
 	#./3fex.x prueba.pcap malo.pcap hola.csv holaipts.txt
-	#./3fex.x prueba.pcap hola.csv holaipts.txt
-	#./3fex.x tftp_rrq.pcap hola.csv holaipts.txt
-	#./3fex.x nb6-http.pcap hola.csv holaipts.txt
-	#./3fex.x sesioncompleta1.pcap malo.pcap hola.csv holaipts.txt
-	#/3fex.x tcpdump1.out hola.csv holaipts.txt
-	#./3fex.x idprueba.pcap hola.csv holaipts.txt
-	#./3fex.x idprueba.pcap holaipv6.csv holaiptsipv6.txt
-	#./3fex.x sesion_01_completa.pcap holaipv6.csv holaiptsipv6.txt
+	#./tcpv4.x prueba.pcap hola.csv holaipts.txt
+	#./tcpv6.x tftp_rrq.pcap hola.csv holaipts.txt
+	#./udpv4.x nb6-http.pcap hola.csv holaipts.txt
+	#./udpv6.x sesioncompleta1.pcap malo.pcap hola.csv holaipts.txt
 	#./3fex.x ../../securitylab/Proyecto_generador_de_trazas\ /idprueba.pcap  otro.csv ipst_otro.txt
 	#./splitTrafic.x rawTrafic.pcap badTrafic.pcap nameFreeAnomali.pcap

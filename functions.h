@@ -10,6 +10,32 @@ FILE *raw, *csv, *ipts, *alertT;
 
 pthread_mutex_t mutex;
 
+std::string *socket_to_String(std::string *ip_dhost, std::string *ip_shost, TCPheader *ports)
+{
+    std::string *socket = new std::string;
+    char buffer[17];
+    *socket += *ip_dhost;
+    sprintf(buffer, "%x", (uint16_t)ports->dstPort);
+    *socket += buffer;
+    *socket += *ip_shost;
+    sprintf(buffer, "%x", (uint16_t)ports->srcPort);
+    *socket += buffer;
+    return socket;
+}
+std::string *socket_to_String(uint32_t *ip_dhost, uint32_t *ip_shost, TCPheader *ports)
+{
+    std::string *socket = new std::string;
+    char buffer[17];
+    sprintf(buffer, "%x", (uint32_t)*ip_dhost);
+    *socket += buffer;
+    sprintf(buffer, "%x", (uint16_t)ports->dstPort);
+    *socket += buffer;
+    sprintf(buffer, "%x", (uint32_t)*ip_shost);
+    *socket += buffer;
+    sprintf(buffer, "%x", (uint16_t)ports->srcPort);
+    *socket += buffer;
+    return socket;
+}
 void mark(uint64_t point)
 {
     for (int i = 0; i < 4; i++)
@@ -264,7 +290,7 @@ void *scanFlowIpv4TCP(void *valor)
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //
-                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_fiat = total_fpackets > 1 ? min_fiat : NAN;
                     min_biat = total_bpackets > 1 ? min_biat : NAN;
                     //
                     total_fiat = total_fpackets > 1 ? total_fiat : NAN;
@@ -277,8 +303,8 @@ void *scanFlowIpv4TCP(void *valor)
                     max_fiat = total_fpackets > 1 ? max_fiat : NAN;
                     max_biat = total_bpackets > 1 ? max_biat : NAN;
                     //
-                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
-                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
+                    min_flowiat = (total_fpackets + total_bpackets) > 1 ? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets + total_bpackets) > 1 ? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -288,13 +314,13 @@ void *scanFlowIpv4TCP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    
+
                     std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
                     std_fiat = total_fpackets > 1 ? std_fiat : NAN;
                     std_biat = total_bpackets > 1 ? std_biat : NAN;
-                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
-                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
-                    fprintf(csv, "TCP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
+                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : NAN;
+                    fprintf(csv, "TCP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             timestampInit,
                             ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
                             ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
@@ -347,9 +373,10 @@ void *scanFlowIpv4TCP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_fpackets / (float)total_bpackets));
+                            (total_fpackets / (float)total_bpackets),
+                            isBadTrafic(*socket_to_String(&ip_dhost,&ip_shost,&ports),IPV4_TCP)
+                            );
                     fprintf(ipts, "%s\n", iptsCad.c_str());
-                    printf("srcport:%x\t ip: %x\n",ports.srcPort,ip_shost);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
                     //printf("Timestamp%f\n",timestampInit);
                     //printf("Timestamp%f\n",timestampPrev);
@@ -463,7 +490,6 @@ void *scanFlowIpv4TCP(void *valor)
                         //
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
-                        
 
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
@@ -599,9 +625,9 @@ void *scanFlowIpv4UDP(void *valor)
     //yield();
     pthread_mutex_lock(&mutex); //Inicio SC
     resetVar();
-    jump = 0;  //yield();
+    jump = 0; //yield();
     printf("thread->%d\n", *(int *)valor);
-    
+
     while (true)
     {
         //printf("primer ciclo\n");
@@ -621,7 +647,7 @@ void *scanFlowIpv4UDP(void *valor)
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //
-                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_fiat = total_fpackets > 1 ? min_fiat : NAN;
                     min_biat = total_bpackets > 1 ? min_biat : NAN;
                     //
                     total_fiat = total_fpackets > 1 ? total_fiat : NAN;
@@ -634,8 +660,8 @@ void *scanFlowIpv4UDP(void *valor)
                     max_fiat = total_fpackets > 1 ? max_fiat : NAN;
                     max_biat = total_bpackets > 1 ? max_biat : NAN;
                     //
-                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
-                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
+                    min_flowiat = (total_fpackets + total_bpackets) > 1 ? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets + total_bpackets) > 1 ? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -645,13 +671,13 @@ void *scanFlowIpv4UDP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    
+
                     std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
                     std_fiat = total_fpackets > 1 ? std_fiat : NAN;
                     std_biat = total_bpackets > 1 ? std_biat : NAN;
-                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
-                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
-                    fprintf(csv, "UDP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
+                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : NAN;
+                    fprintf(csv, "UDP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             timestampInit,
                             ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
                             ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
@@ -704,7 +730,9 @@ void *scanFlowIpv4UDP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_fpackets / (float)total_bpackets));
+                            (total_fpackets / (float)total_bpackets),
+                            isBadTrafic(*socket_to_String(&ip_dhost,&ip_shost,&ports),IPV4_UDP)
+                            );
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
@@ -818,7 +846,6 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
-                        
 
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
@@ -969,11 +996,11 @@ void *scanFlowIpv6TCP(void *valor)
                 {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                     min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
+                    min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //
-                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_fiat = total_fpackets > 1 ? min_fiat : NAN;
                     min_biat = total_bpackets > 1 ? min_biat : NAN;
                     //
                     total_fiat = total_fpackets > 1 ? total_fiat : NAN;
@@ -986,8 +1013,8 @@ void *scanFlowIpv6TCP(void *valor)
                     max_fiat = total_fpackets > 1 ? max_fiat : NAN;
                     max_biat = total_bpackets > 1 ? max_biat : NAN;
                     //
-                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
-                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
+                    min_flowiat = (total_fpackets + total_bpackets) > 1 ? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets + total_bpackets) > 1 ? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -997,13 +1024,13 @@ void *scanFlowIpv6TCP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    
+
                     std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
                     std_fiat = total_fpackets > 1 ? std_fiat : NAN;
                     std_biat = total_bpackets > 1 ? std_biat : NAN;
-                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
-                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
-                    fprintf(csv, "TCP,%f,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
+                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : NAN;
+                    fprintf(csv, "TCP,%f,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             timestampInit,
                             ipv6_SCad.c_str(),
                             ipv6_DCad.c_str(),
@@ -1056,7 +1083,8 @@ void *scanFlowIpv6TCP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_fpackets / (float)total_bpackets)
+                            (total_fpackets / (float)total_bpackets),
+                            isBadTrafic(*socket_to_String(&ipv6_SCad,&ipv6_SCad,&ports),IPV6_TCP)
                             );
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
@@ -1245,8 +1273,8 @@ void *scanFlowIpv6TCP(void *valor)
                         iptTemp = timestampTemp - timestampPrev;
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
-                        
-                         //extraccion de caracteristicas en backward direccion
+
+                        //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += orig_len;
                         //
@@ -1341,11 +1369,11 @@ void *scanFlowIpv6UDP(void *valor)
                 {
                     //printf("fin sesion\n");
                     //guardar featurs en archivo csv
-                     min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
+                    min_bpktl = min_bpktl == 65535 ? NAN : min_bpktl;
                     mean_fpktl = total_fpktl / ((float)total_fpackets);
                     mean_bpktl = total_bpackets > 0 ? (total_bpktl / ((float)total_bpackets)) : NAN;
                     //
-                    min_fiat = total_fpackets>1 ? min_fiat : NAN;
+                    min_fiat = total_fpackets > 1 ? min_fiat : NAN;
                     min_biat = total_bpackets > 1 ? min_biat : NAN;
                     //
                     total_fiat = total_fpackets > 1 ? total_fiat : NAN;
@@ -1358,8 +1386,8 @@ void *scanFlowIpv6UDP(void *valor)
                     max_fiat = total_fpackets > 1 ? max_fiat : NAN;
                     max_biat = total_bpackets > 1 ? max_biat : NAN;
                     //
-                    min_flowiat = (total_fpackets+total_bpackets)>1? min_flowiat : NAN;
-                    max_flowiat = (total_fpackets+total_bpackets)>1? max_flowiat : NAN;
+                    min_flowiat = (total_fpackets + total_bpackets) > 1 ? min_flowiat : NAN;
+                    max_flowiat = (total_fpackets + total_bpackets) > 1 ? max_flowiat : NAN;
                     //
                     mean_flowpktl = (mean_flowpktl / (total_fpackets + total_bpackets));
                     //
@@ -1369,13 +1397,13 @@ void *scanFlowIpv6UDP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-                    
+
                     std_bpktl = total_bpackets > 0 ? std_bpktl : NAN;
                     std_fiat = total_fpackets > 1 ? std_fiat : NAN;
                     std_biat = total_bpackets > 1 ? std_biat : NAN;
-                    std_flowiat = (total_fpackets + total_bpackets) >1 ? std_flowiat : NAN;
-                    mean_flowiat = (total_fpackets + total_bpackets) >1 ? mean_flowiat : NAN;
-                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f\n",
+                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : NAN;
+                    mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : NAN;
+                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,->,->,%f,%f,%f,%f,%d,%d,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             ipv6_SCad.c_str(),
                             ipv6_DCad.c_str(),
                             ipv6_SCad.c_str(), ports.srcPort,
@@ -1427,7 +1455,8 @@ void *scanFlowIpv6UDP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_fpackets / (float)total_bpackets)
+                            (total_fpackets / (float)total_bpackets),
+                            isBadTrafic(*socket_to_String(&ipv6_SCad,&ipv6_SCad,&ports),IPV6_UDP)
                             );
                     fprintf(ipts, "%s\n", iptsCad.c_str());
                     //printf("srcport:%u",ports.srcPort);
@@ -1609,8 +1638,8 @@ void *scanFlowIpv6UDP(void *valor)
                         iptTemp = timestampTemp - timestampPrev;
                         iptsCad += std::to_string(iptTemp) + ",";
                         timestampPrev = timestampTemp;
-                        
-                         //extraccion de caracteristicas en backward direccion
+
+                        //extraccion de caracteristicas en backward direccion
                         total_bpackets++;
                         total_bpktl += orig_len;
                         //

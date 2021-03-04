@@ -28,6 +28,7 @@ int main(int argc, char **argv)
         fileFeatures = *(argv + 3);
         fileIpts = *(argv + 4);
         alertT = fopen(alertTrafic, "rb");
+        isPcapFile(*alertT);
         /*
         fseek(alertT, 0L, SEEK_END);
         pointerbffAlertTrafic = ftell(alertT) - 24;
@@ -40,6 +41,7 @@ int main(int argc, char **argv)
     }
 
     raw = fopen(fileTrafic, "rb");
+    isPcapFile(*raw);
     csv = fopen(fileFeatures, "w");
     ipts = fopen(fileIpts, "w");
     if (!ipts)

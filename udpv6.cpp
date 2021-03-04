@@ -20,12 +20,14 @@ int main(int argc, char **argv)
         fileFeatures = *(argv + 3);
         fileIpts = *(argv + 4);
         alertT = fopen(alertTrafic, "rb");
-        fseek(alertT, 0L, SEEK_END);
-        pointerbffAlertTrafic = ftell(alertT) - 24;
-        fseek(alertT, 24L, SEEK_SET);
-        bffAlertTrafic = new unsigned char[pointerbffAlertTrafic];
-        pointerbffAlertTrafic = fread(bffAlertTrafic, sizeof(unsigned char), pointerbffAlertTrafic, alertT);
-        printf("bytes alert trafic: %" PRId64 "\n", pointerbffAlertTrafic);
+        isPcapFile(*alertT);
+        readBadTrafic(*alertT);
+        // fseek(alertT, 0L, SEEK_END);
+        // pointerbffAlertTrafic = ftell(alertT) - 24;
+        // fseek(alertT, 24L, SEEK_SET);
+        // bffAlertTrafic = new unsigned char[pointerbffAlertTrafic];
+        // pointerbffAlertTrafic = fread(bffAlertTrafic, sizeof(unsigned char), pointerbffAlertTrafic, alertT);
+        // printf("bytes alert trafic: %" PRId64 "\n", pointerbffAlertTrafic);
     }
 
     raw = fopen(fileTrafic, "rb");

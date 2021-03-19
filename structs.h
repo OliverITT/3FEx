@@ -165,22 +165,26 @@ typedef struct Packet_pcap
         switch (tipe)
         {
         case IPV4_TCP:
-            sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_dhost), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 24));
+            // sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_dhost), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 24));
+            sprintf(buffer, "%x", (uint32_t)((ip_layer.ipv4Header.ip_dhost<<24)|((ip_layer.ipv4Header.ip_dhost<<8)& 0xff0000)|((ip_layer.ipv4Header.ip_dhost>>8)& 0xff00)|(ip_layer.ipv4Header.ip_dhost>>24)));
             *ip_proto = buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.dstPort >> 8) | (proto.tcpHeader.dstPort << 8)));
             *ip_proto += buffer;
-            sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_shost), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 24));
+            // sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_shost), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 24));
+            sprintf(buffer, "%x", (uint32_t)((ip_layer.ipv4Header.ip_shost<<24)|((ip_layer.ipv4Header.ip_shost<<8)& 0xff0000)|((ip_layer.ipv4Header.ip_shost>>8)& 0xff00)|(ip_layer.ipv4Header.ip_shost>>24)));
             *ip_proto += buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.srcPort >> 8) | (proto.tcpHeader.srcPort << 8)));
             *ip_proto += buffer;
             break;
         case IPV4_UDP:
             /* code */
-            sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_dhost), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 24));
+            // sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_dhost), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_dhost >> 24));
+            sprintf(buffer, "%x", (uint32_t)((ip_layer.ipv4Header.ip_dhost<<24)|((ip_layer.ipv4Header.ip_dhost<<8)& 0xff0000)|((ip_layer.ipv4Header.ip_dhost>>8)& 0xff00)|(ip_layer.ipv4Header.ip_dhost>>24)));
             *ip_proto = buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.dstPort >> 8) | (proto.uDPheader.dstPort << 8)));
             *ip_proto += buffer;
-            sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_shost), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 24));
+            // sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_shost), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 24));
+            sprintf(buffer, "%x", (uint32_t)((ip_layer.ipv4Header.ip_shost<<24)|((ip_layer.ipv4Header.ip_shost<<8)& 0xff0000)|((ip_layer.ipv4Header.ip_shost>>8)& 0xff00)|(ip_layer.ipv4Header.ip_shost>>24)));
             *ip_proto += buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.srcPort >> 8) | (proto.uDPheader.srcPort << 8)));
             *ip_proto += buffer;

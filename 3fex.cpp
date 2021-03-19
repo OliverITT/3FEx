@@ -38,6 +38,11 @@ int main(int argc, char **argv)
         printf("bytes alert trafic: %" PRId64 "\n", pointerbffAlertTrafic);
         */
         readBadTrafic(*alertT);
+        if (alertT)
+        {
+            printf("alert open\t %lu\n", data.size());
+            fclose(alertT);
+        }
     }
 
     raw = fopen(fileTrafic, "rb");
@@ -71,10 +76,7 @@ int main(int argc, char **argv)
     {
         fclose(raw);
     }
-    if (alertT)
-    {
-        fclose(alertT);
-    }
+
     pthread_t hilo0, hilo1, hilo2, hilo3;
     int u = 1, p = 2, o = 3, r = 4;
     ;

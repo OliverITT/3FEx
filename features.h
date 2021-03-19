@@ -26,13 +26,13 @@ std::vector<float>::iterator it_std_flowpktl;
 std::vector<float> vector_std_flowiat;
 //ipts
 std::string iptsCad = "";
-std::string ipv6_SCad="";
-std::string ipv6_DCad="";
+std::string ipv6_SCad = "";
+std::string ipv6_DCad = "";
 std::stringstream stream;
-double iptTemp = 0;
+float iptTemp = 0;
 //var flow
-bool iatForwardState =false;
-bool iatBackwardState =false;
+// bool iatForwardState =false;
+bool iatBackwardState = false;
 //var flow
 double timestampInit = 0;
 double timestampPrev = 0;
@@ -42,10 +42,10 @@ uint32_t ip_shost = 0; //
 uint32_t ip_dhost = 0;
 uint32_t ip_shost_temp = 0; //
 uint32_t ip_dhost_temp = 0; //
-__uint128_t ipv6_shost =0;
-__uint128_t ipv6_dhost =0;
-__uint128_t ipv6_shost_temp =0;
-__uint128_t ipv6_dhost_temp =0;
+__uint128_t ipv6_shost = 0;
+__uint128_t ipv6_dhost = 0;
+__uint128_t ipv6_shost_temp = 0;
+__uint128_t ipv6_dhost_temp = 0;
 TCPheader ports;
 TCPheader ports_temp;
 //"feduration",	        // Duration of the flow in Microsecond
@@ -81,10 +81,9 @@ uint32_t bpsh_cnt = 0; // Number of times the PSH flag was set in packets travel
 uint32_t furg_cnt = 0; // Number of times the URG flag was set in packets travelling in the forward direction (0 for UDP)
 uint32_t burg_cnt = 0; // Number of times the URG flag was set in packets travelling in the backward direction (0 for UDP)
 
-/*            
-            ->"total_fhlen",	        // Total bytes used for headers in the forward direction
-            ->"total_bhlen",	        // Total bytes used for headers in the forward direction
-            */
+uint32_t total_fhlen = 0; // Total bytes used for headers in the forward direction
+uint32_t total_bhlen = 0; // Total bytes used for headers in the forward direction
+
 /* ya calculados en archivo functions
 float fPktsPerSecond = 0;     // Number of forward packets per second
 float bPktsPerSecond = 0;     // Number of backward packets per second
@@ -130,7 +129,7 @@ uint32_t flow_ece = 0; // Number of packets with ECE
             */
 //vars control
 uint32_t incl_leng = 0; /* number of octets of packet saved in file */
-uint32_t orig_len =0; /* actual length of packet */
+uint32_t orig_len = 0;  /* actual length of packet */
 uint64_t jump = 0;
 uint64_t traficPointer = 0;
 uint8_t traficTipe = 0;
@@ -151,9 +150,9 @@ void resetVar()
     vector_std_biat.clear();
     vector_std_flowpktl.clear();
     vector_std_flowiat.clear();
-    
-    iatForwardState =false;
-    iatBackwardState =false;
+
+    //iatForwardState =false;
+    iatBackwardState = false;
     //flow
     timestampInit = 0;
     timestampPrev = 0;
@@ -187,11 +186,9 @@ void resetVar()
     furg_cnt = 0; // Number of times the URG flag was set in packets travelling in the forward direction (0 for UDP)
     burg_cnt = 0; // Number of times the URG flag was set in packets travelling in the backward direction (0 for UDP)
 
-    /*
+    total_fhlen = 0; // Total bytes used for headers in the forward direction
+    total_bhlen = 0; // Total bytes used for headers in the forward direction
 
-            ->"total_fhlen",	        // Total bytes used for headers in the forward direction
-            ->"total_bhlen",	        // Total bytes used for headers in the forward direction
-            */
     /* calculados en archivo functions
         fPktsPerSecond = 0;     // Number of forward packets per second
         bPktsPerSecond = 0;     // Number of backward packets per second
@@ -240,7 +237,7 @@ void resetVar()
         */
     //vars control
     incl_leng = 0;
-    orig_len =0;
+    orig_len = 0;
     //jump = 0;
     traficTipe = 0;
 
@@ -252,5 +249,5 @@ void resetVar()
     ip_shost = ip_dhost = 0;
     ports.srcPort = ports.dstPort = 0;
     ipv6_shost = ipv6_dhost = 0;
-    ports_temp.dstPort = ports_temp.srcPort =0;
+    ports_temp.dstPort = ports_temp.srcPort = 0;
 }

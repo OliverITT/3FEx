@@ -14,16 +14,16 @@ std::vector<float>::iterator it_std_fpktl;
 std::vector<float> vector_std_bpktl;
 std::vector<float>::iterator it_std_bpktl;
 //
-std::vector<float> vector_std_fiat;
-std::vector<float>::iterator it_std_fiat;
+std::vector<float> vector_std_fipt;
+std::vector<float>::iterator it_std_fipt;
 //
-std::vector<float> vector_std_biat;
-std::vector<float>::iterator it_std_biat;
+std::vector<float> vector_std_bipt;
+std::vector<float>::iterator it_std_bipt;
 //
 std::vector<float> vector_std_flowpktl;
 std::vector<float>::iterator it_std_flowpktl;
 //
-std::vector<float> vector_std_flowiat;
+std::vector<float> vector_std_flowipt;
 //ipts
 std::string iptsCad = "";
 std::string ipv6_SCad = "";
@@ -32,7 +32,7 @@ std::stringstream stream;
 float iptTemp = 0;
 //var flow
 // bool iatForwardState =false;
-bool iatBackwardState = false;
+bool iptBackwardState = false;
 //var flow
 double timestampInit = 0;
 double timestampPrev = 0;
@@ -61,20 +61,20 @@ float mean_fpktl = 0;        // Mean size of packet in forward direction
 float mean_bpktl = 0;        // Mean size of packet in backward direction
 double std_fpktl = 0.0;      // Standard deviation size of packet in forward direction
 double std_bpktl = 0.0;      // Standard deviation size of packet in backward direction
-double total_fiat = 0;       // Total time between two packets sent in the forward direction
-double total_biat = 0;       // Total time between two packets sent in the backward direction
+double total_fipt = 0;       // Total time between two packets sent in the forward direction
+double total_bipt = 0;       // Total time between two packets sent in the backward direction
 
-float min_fiat = 65536; // Minimum time between two packets sent in the forward direction
-float min_biat = 65536; // Minimum time between two packets sent in the backward direction
+float min_fipt = 65536; // Minimum time between two packets sent in the forward direction
+float min_bipt = 65536; // Minimum time between two packets sent in the backward direction
 //
-float max_fiat = 0; // Maximum time between two packets sent in the forward direction
-float max_biat = 0; // Maximum time between two packets sent in the backward direction
+float max_fipt = 0; // Maximum time between two packets sent in the forward direction
+float max_bipt = 0; // Maximum time between two packets sent in the backward direction
 
-float mean_fiat = 0; // Mean time between two packets sent in the forward direction
-float mean_biat = 0; // Mean time between two packets sent in the backward direction
+float mean_fipt = 0; // Mean time between two packets sent in the forward direction
+float mean_bipt = 0; // Mean time between two packets sent in the backward direction
 //
-float std_fiat = 0; // Standard deviation time between two packets sent in the forward direction
-float std_biat = 0; // Standard deviation time between two packets sent in the backward direction
+float std_fipt = 0; // Standard deviation time between two packets sent in the forward direction
+float std_bipt = 0; // Standard deviation time between two packets sent in the backward direction
 //
 uint32_t fpsh_cnt = 0; // Number of times the PSH flag was set in packets travelling in the forward direction (0 for UDP)
 uint32_t bpsh_cnt = 0; // Number of times the PSH flag was set in packets travelling in the backward direction (0 for UDP)
@@ -84,11 +84,12 @@ uint32_t burg_cnt = 0; // Number of times the URG flag was set in packets travel
 uint32_t total_fhlen = 0; // Total bytes used for headers in the forward direction
 uint32_t total_bhlen = 0; // Total bytes used for headers in the forward direction
 
-/* ya calculados en archivo functions
+
 float fPktsPerSecond = 0;     // Number of forward packets per second
 float bPktsPerSecond = 0;     // Number of backward packets per second
 float flowPktsPerSecond = 0;  // Number of flow packets per second
 float flowBytesPerSecond = 0; // Number of flow bytes per second
+/*
             -> numero de paquetes en direccion / duracion de flujo? "fPktsPerSecond",	    // Number of forward packets per second
             ->*"bPktsPerSecond",	    // Number of backward packets per second
             ->*"flowPktsPerSecond",	// Number of flow packets per second
@@ -100,10 +101,10 @@ uint32_t max_flowpktl = 0; // Maximum length of a flow
 double mean_flowpktl = 0;  // Mean length of a flow
 float std_flowpktl = 0;    // Standard deviation length of a flow
 
-float min_flowiat = 0;   // Minimum inter-arrival time of packet
-float max_flowiat = 0;   // Maximum inter-arrival time of packet
-double mean_flowiat = 0; // Mean inter-arrival time of packet
-double std_flowiat = 0;  // Standard deviation inter-arrival time of packet
+float min_flowipt = 0;   // Minimum inter-arrival time of packet
+float max_flowipt = 0;   // Maximum inter-arrival time of packet
+double mean_flowipt = 0; // Mean inter-arrival time of packet
+double std_flowipt = 0;  // Standard deviation inter-arrival time of packet
 
 uint32_t flow_fin = 0; // Number of packets with FIN
 uint32_t flow_syn = 0; // Number of packets with SYN
@@ -146,13 +147,13 @@ void resetVar()
     //
     vector_std_fpktl.clear();
     vector_std_bpktl.clear();
-    vector_std_fiat.clear();
-    vector_std_biat.clear();
+    vector_std_fipt.clear();
+    vector_std_bipt.clear();
     vector_std_flowpktl.clear();
-    vector_std_flowiat.clear();
+    vector_std_flowipt.clear();
 
     //iatForwardState =false;
-    iatBackwardState = false;
+    iptBackwardState = false;
     //flow
     timestampInit = 0;
     timestampPrev = 0;
@@ -169,17 +170,17 @@ void resetVar()
     std_fpktl = 0;      // Standard deviation size of packet in forward direction
     std_bpktl = 0;      // Standard deviation size of packet in backward direction
 
-    total_fiat = 0; // Total time between two packets sent in the forward direction
-    total_biat = 0; // Total time between two packets sent in the backward direction
+    total_fipt = 0; // Total time between two packets sent in the forward direction
+    total_bipt = 0; // Total time between two packets sent in the backward direction
 
-    min_fiat = 65536; // Minimum time between two packets sent in the forward direction
-    min_biat = 65536; // Minimum time between two packets sent in the backward direction
-    max_fiat = 0;     // Maximum time between two packets sent in the forward direction
-    max_biat = 0;     // Maximum time between two packets sent in the backward direction
-    mean_fiat = 0;    // Mean time between two packets sent in the forward direction
-    mean_biat = 0;    // Mean time between two packets sent in the backward direction
-    std_fiat = 0;     // Standard deviation time between two packets sent in the forward direction
-    std_biat = 0;     // Standard deviation time between two packets sent in the backward direction
+    min_fipt = 65536; // Minimum time between two packets sent in the forward direction
+    min_bipt = 65536; // Minimum time between two packets sent in the backward direction
+    max_fipt = 0;     // Maximum time between two packets sent in the forward direction
+    max_bipt = 0;     // Maximum time between two packets sent in the backward direction
+    mean_fipt = 0;    // Mean time between two packets sent in the forward direction
+    mean_bipt = 0;    // Mean time between two packets sent in the backward direction
+    std_fipt = 0;     // Standard deviation time between two packets sent in the forward direction
+    std_bipt = 0;     // Standard deviation time between two packets sent in the backward direction
 
     fpsh_cnt = 0; // Number of times the PSH flag was set in packets travelling in the forward direction (0 for UDP)
     bpsh_cnt = 0; // Number of times the PSH flag was set in packets travelling in the backward direction (0 for UDP)
@@ -189,12 +190,10 @@ void resetVar()
     total_fhlen = 0; // Total bytes used for headers in the forward direction
     total_bhlen = 0; // Total bytes used for headers in the forward direction
 
-    /* calculados en archivo functions
         fPktsPerSecond = 0;     // Number of forward packets per second
         bPktsPerSecond = 0;     // Number of backward packets per second
         flowPktsPerSecond = 0;  // Number of flow packets per second
         flowBytesPerSecond = 0; // Number of flow bytes per second*
-*/
 
     /*
             -> numero de paquetes en direccion / duracion de flujo? "fPktsPerSecond",	    // Number of forward packets per second
@@ -206,12 +205,12 @@ void resetVar()
     min_flowpktl = 0;  // Minimum length of a flow
     max_flowpktl = 0;  // Maximum length of a flow
     mean_flowpktl = 0; // Mean length of a flow
-    std_flowpktl = 0;  // Standard deviation length of a flow
+    std_flowpktl = 0;  // Standard deviption length of a flow
 
-    min_flowiat = 0;  // Minimum inter-arrival time of packet
-    max_flowiat = 0;  // Maximum inter-arrival time of packet
-    mean_flowiat = 0; // Mean inter-arrival time of packet
-    std_flowiat = 0;  // Standard deviation inter-arrival time of packet
+    min_flowipt = 0;  // Minimum inter-arrival time of packet
+    max_flowipt = 0;  // Maximum inter-arrival time of packet
+    mean_flowipt = 0; // Mean inter-arrival time of packet
+    std_flowipt = 0;  // Standard deviation inter-arrival time of packet
 
     flow_fin = 0; // Number of packets with FIN
     flow_syn = 0; // Number of packets with SYN

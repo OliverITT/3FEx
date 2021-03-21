@@ -322,7 +322,7 @@ void *scanFlowIpv4TCP(void *valor)
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
-                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
+                    std_flowiat = (total_fpackets + total_bpackets) > 2 ? std_flowiat : 0;
                     mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : 0;
                     fprintf(csv, "TCP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             timestampInit,
@@ -689,7 +689,7 @@ void *scanFlowIpv4UDP(void *valor)
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
-                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
+                    std_flowiat = (total_fpackets + total_bpackets) > 2 ? std_flowiat : 0;
                     mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : 0;
                     fprintf(csv, "UDP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             timestampInit,
@@ -1050,7 +1050,7 @@ void *scanFlowIpv6TCP(void *valor)
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
-                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
+                    std_flowiat = (total_fpackets + total_bpackets) > 2 ? std_flowiat : 0;
                     mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : 0;
                     fprintf(csv, "TCP,%f,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             timestampInit,
@@ -1433,7 +1433,7 @@ void *scanFlowIpv6UDP(void *valor)
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
-                    std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
+                    std_flowiat = (total_fpackets + total_bpackets) > 2 ? std_flowiat : 0;
                     mean_flowiat = (total_fpackets + total_bpackets) > 1 ? mean_flowiat : 0;
                     fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
                             ipv6_SCad.c_str(),

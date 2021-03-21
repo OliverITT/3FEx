@@ -320,8 +320,8 @@ void *scanFlowIpv4TCP(void *valor)
                     std_flowpktl = (total_fpackets + total_bpackets) > 1 ? std_flowpktl : 0;
                     std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
-                    std_fipt = total_fpackets > 1 ? std_fipt : 0;
-                    std_bipt = total_bpackets > 1 ? std_bipt : 0;
+                    std_fipt = total_fpackets > 2 ? std_fipt : 0;
+                    std_bipt = total_bpackets > 2 ? std_bipt : 0;
                     std_flowipt = (total_fpackets + total_bpackets) > 2 ? std_flowipt : 0;
                     mean_flowipt = (total_fpackets + total_bpackets) > 1 ? mean_flowipt : 0;
                     //
@@ -693,8 +693,8 @@ void *scanFlowIpv4UDP(void *valor)
                     std_flowpktl = (total_fpackets + total_bpackets) > 1 ? std_flowpktl : 0;
                     std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
-                    std_fipt = total_fpackets > 1 ? std_fipt : 0;
-                    std_bipt = total_bpackets > 1 ? std_bipt : 0;
+                    std_fipt = total_fpackets > 2 ? std_fipt : 0;
+                    std_bipt = total_bpackets > 2 ? std_bipt : 0;
                     std_flowipt = (total_fpackets + total_bpackets) > 2 ? std_flowipt : 0;
                     mean_flowipt = (total_fpackets + total_bpackets) > 1 ? mean_flowipt : 0;
                     //
@@ -1060,8 +1060,8 @@ void *scanFlowIpv6TCP(void *valor)
                     std_flowpktl = (total_fpackets + total_bpackets) > 1 ? std_flowpktl : 0;
                     std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
-                    std_fipt = total_fpackets > 1 ? std_fipt : 0;
-                    std_bipt = total_bpackets > 1 ? std_bipt : 0;
+                    std_fipt = total_fpackets > 2 ? std_fipt : 0;
+                    std_bipt = total_bpackets > 2 ? std_bipt : 0;
                     std_flowipt = (total_fpackets + total_bpackets) > 2 ? std_flowipt : 0;
                     mean_flowipt = (total_fpackets + total_bpackets) > 1 ? mean_flowipt : 0;
                     //
@@ -1449,8 +1449,8 @@ void *scanFlowIpv6UDP(void *valor)
                     std_flowpktl = (total_fpackets + total_bpackets) > 1 ? std_flowpktl : 0;
                     std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
                     std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
-                    std_fipt = total_fpackets > 1 ? std_fipt : 0;
-                    std_bipt = total_bpackets > 1 ? std_bipt : 0;
+                    std_fipt = total_fpackets > 2 ? std_fipt : 0;
+                    std_bipt = total_bpackets > 2 ? std_bipt : 0;
                     std_flowipt = (total_fpackets + total_bpackets) > 2 ? std_flowipt : 0;
                     mean_flowipt = (total_fpackets + total_bpackets) > 1 ? mean_flowipt : 0;
                     //

@@ -316,8 +316,10 @@ void *scanFlowIpv4TCP(void *valor)
                     calculate_std_iat();
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
-
-                    std_bpktl = total_bpackets > 0 ? std_bpktl : 0;
+                
+                    std_flowpktl = (total_fpackets+total_bpackets) > 1 ? std_flowpktl : 0;
+                    std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
+                    std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
                     std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
@@ -492,7 +494,7 @@ void *scanFlowIpv4TCP(void *valor)
                         //
                         iptTemp = (float)(timestampTemp - timestampPrev);
                         //
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas forward direccion
@@ -553,7 +555,7 @@ void *scanFlowIpv4TCP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion
@@ -682,7 +684,9 @@ void *scanFlowIpv4UDP(void *valor)
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
 
-                    std_bpktl = total_bpackets > 0 ? std_bpktl : 0;
+                    std_flowpktl = (total_fpackets+total_bpackets) > 1 ? std_flowpktl : 0;
+                    std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
+                    std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
                     std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
@@ -856,7 +860,7 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         iptTemp = timestampTemp - timestampPrev;
                         //
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas forward direccion
@@ -913,7 +917,7 @@ void *scanFlowIpv4UDP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion
@@ -1041,7 +1045,9 @@ void *scanFlowIpv6TCP(void *valor)
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
 
-                    std_bpktl = total_bpackets > 0 ? std_bpktl : 0;
+                    std_flowpktl = (total_fpackets+total_bpackets) > 1 ? std_flowpktl : 0;
+                    std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
+                    std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
                     std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
@@ -1233,7 +1239,7 @@ void *scanFlowIpv6TCP(void *valor)
                         //
                         iptTemp = timestampTemp - timestampPrev;
                         //
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
@@ -1292,7 +1298,7 @@ void *scanFlowIpv6TCP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion
@@ -1422,7 +1428,9 @@ void *scanFlowIpv6UDP(void *valor)
                     calculate_std_flowpktl();
                     calculate_std_flowiat();
 
-                    std_bpktl = total_bpackets > 0 ? std_bpktl : 0;
+                    std_flowpktl = (total_fpackets+total_bpackets) > 1 ? std_flowpktl : 0;
+                    std_fpktl = total_fpackets > 1 ? std_fpktl : 0;
+                    std_bpktl = total_bpackets > 1 ? std_bpktl : 0;
                     std_fiat = total_fpackets > 1 ? std_fiat : 0;
                     std_biat = total_bpackets > 1 ? std_biat : 0;
                     std_flowiat = (total_fpackets + total_bpackets) > 1 ? std_flowiat : 0;
@@ -1609,7 +1617,7 @@ void *scanFlowIpv6UDP(void *valor)
                         //
                         iptTemp = timestampTemp - timestampPrev;
                         //
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
@@ -1665,7 +1673,7 @@ void *scanFlowIpv6UDP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,",iptTemp);
+                        fprintf(ipts, "%.20f,", iptTemp);
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion

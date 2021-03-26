@@ -1,0 +1,15 @@
+                                               
+ ad888888b,  88888888888                       
+d8"     "88  88                                
+        a8P  88                                
+     aad8"   88aaaaa   ,adPPYba,  8b,     ,d8  
+     ""Y8,   88"""""  a8P_____88   `Y8, ,8P'   
+        "8b  88       8PP"""""""     )888(     
+Y8,     a88  88       "8b,   ,aa   ,d8" "8b,   
+ "Y888888P'  88        `"Ybbd8"'  8P'     `Y8  
+                                               
+
+-r  Input pcap raw file 
+-b  Input pcap alert file 
+-f  Output csv features file
+-i  Output txt inter packet times file

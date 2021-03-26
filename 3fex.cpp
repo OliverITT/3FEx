@@ -5,54 +5,90 @@ char *fileTrafic;
 char *fileFeatures;
 char *fileIpts;
 char *alertTrafic;
+const char banner[] = "banner.txt";
+#define ERROR 1
+void printBanner()
+{
+    FILE *bannerFile;
+    bannerFile = fopen(banner, "r");
+    char c;
+    while ((c = getc(bannerFile)) != EOF)
+    {
+        printf("%c", c);
+    }
+    if (bannerFile)
+    {
+        fclose(bannerFile);
+    }
+}
 int main(int argc, char **argv)
 {
-
-    if (argc == 4)
+    if (argc < 5)
     {
-        fileTrafic = *(argv + 1);
-        fileFeatures = *(argv + 2);
-        fileIpts = *(argv + 3);
+        printBanner();
+        return ERROR;
     }
-    if (argc == 5)
+    if (argc > 4)
     {
-        fileTrafic = *(argv + 1);
-        alertTrafic = *(argv + 2);
-        fileFeatures = *(argv + 3);
-        fileIpts = *(argv + 4);
-        alertT = fopen(alertTrafic, "rb");
-        isPcapFile(*alertT);
-        readBadTrafic(*alertT);
-        printf("alerts:\t%lu\n", data.size());
+        for (int i = 1; i < argc; i++)
+        {
+            std::string arg = argv[i];
+            if (arg == "-r")
+            {
+                raw = fopen((char *)argv[i + 1], "rb");
+                if (!raw)
+                {
+                    printf("no open file: %s", argv[i + 1]);
+                    return ERROR;
+                }
+                if (!isPcapFile(*raw))
+                {
+                    return ERROR;
+                }
+            }
+            if (arg == "-f")
+            {
+                csv = fopen(argv[i + 1], "w");
+                if (!csv)
+                {
+                    printf("no open file: %s", argv[i + 1]);
+                    return ERROR;
+                }
+            }
+            if (arg == "-b")
+            {
+                alertT = fopen((char *)argv[i + 1], "rb");
+                if (!alertT)
+                {
+                    printf("no open file: %s", argv[i + 1]);
+                    return ERROR;
+                }
+                if (!isPcapFile(*alertT))
+                {
+                    return ERROR;
+                }
+                readBadTrafic(*alertT);
+                printf("alerts:\t%lu\n", data.size());
+            }
+            if (arg == "-i")
+            {
+                ipts = fopen(argv[i + 1], "w");
+                if (!ipts)
+                {
+                    printf("no open file: %s", argv[i + 1]);
+                    return ERROR;
+                }
+            }
+        }
     }
-
-    raw = fopen(fileTrafic, "rb");
-    isPcapFile(*raw);
-    csv = fopen(fileFeatures, "w");
-    ipts = fopen(fileIpts, "w");
-    if (!ipts)
-    {
-        printf("problemas con archivo csv");
-    }
-
-    PcapFileHeader fileheader;
-    if (!fread(&fileheader, sizeof(PcapFileHeader), 1, raw))
-    {
-        printf("unknown file");
-        return 0;
-    }
-    if (!(fileheader.version_major == 2 && fileheader.version_minor == 4))
-    {
-        printf("unknown file format");
-        return 0;
-    }
+    /*scan*/
     fseek(raw, 0L, SEEK_END);
     pointerbffRawTrafic = ftell(raw) - 24;
     fseek(raw, 24L, SEEK_SET);
     bffRawTrafic = new unsigned char[pointerbffRawTrafic];
     pointerbffRawTrafic = fread(bffRawTrafic, sizeof(unsigned char), pointerbffRawTrafic, raw);
     printf("bytes raw trafic: %" PRId64 "\n", pointerbffRawTrafic);
-
+    /*close pcap raw trafic */
     if (raw)
     {
         fclose(raw);
@@ -72,6 +108,10 @@ int main(int argc, char **argv)
     {
         fprintf(csv, "%s", titlecolums);
     }
+    if (alertT)
+    {
+        fclose(alertT);
+    }
 
     pthread_mutex_unlock(&mutex);
 
@@ -83,11 +123,15 @@ int main(int argc, char **argv)
     pthread_join(hilo1, NULL);
     pthread_join(hilo2, NULL);
     pthread_join(hilo3, NULL);
-    if (alertT)
+
+    /*close file*/
+    if (csv)
     {
-        fclose(alertT);
+        fclose(csv);
     }
-    fclose(csv);
-    fclose(ipts);
+    if (ipts)
+    {
+        fclose(ipts);
+    }
     return 0;
 }

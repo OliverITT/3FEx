@@ -190,6 +190,7 @@ void writeHeaderPcapFile(FILE &FileTrafic, PcapFileHeader *&pcapFileHeader)
 }
 bool isPcapFile(FILE &FilePcap)
 {
+
     PcapFileHeader *pcapFileHeader;
     readHeaderPcapFile(FilePcap, pcapFileHeader);
     if (!(pcapFileHeader->version_major == 2 && pcapFileHeader->version_minor == 4))

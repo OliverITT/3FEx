@@ -330,10 +330,8 @@ void *scanFlowIpv4TCP(void *valor)
                     bPktsPerSecond = total_bpackets > 0 && (timestampPrev - timestampInit) > 0 ? (total_bpackets / (timestampPrev - timestampInit)) : 0;                                          // Number of backward packets per second
                     flowPktsPerSecond = (total_fpackets + total_bpackets) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)) : 0; // Number of flow packets per second
                     flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0;            // Number of flow bytes per second*
-                    fprintf(csv, "TCP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
+                    fprintf(csv, "TCP,%f,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             timestampInit,
-                            ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
-                            ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
                             ip_shost >> 24, (ip_shost >> 16) & 0x0ff, (ip_shost >> 8) & 0x0ff, (ip_shost)&0x0ff, ports.srcPort,
                             ip_dhost >> 24, (ip_dhost >> 16) & 0x0ff, (ip_dhost >> 8) & 0x0ff, (ip_dhost)&0x0ff, ports.dstPort,
                             timestampPrev - timestampInit,
@@ -385,9 +383,16 @@ void *scanFlowIpv4TCP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_bpktl / (float)total_fpktl),
-                            isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
-                    fprintf(ipts, "\n");
+                            (total_bpktl / (float)total_fpktl));
+                    if (alertT)
+                    {
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                    }
+                    fprintf(csv, "\n");
+                    if (ipts)
+                    {
+                        fprintf(ipts, "\n");
+                    }
                     //printf("No. packet TCP: %llu\n", TCP_cont);
                     //printf("Timestamp%f\n",timestampInit);
                     //printf("Timestamp%f\n",timestampPrev);
@@ -399,7 +404,7 @@ void *scanFlowIpv4TCP(void *valor)
                     //fin de scaneo de trafico
                     //printf("\nEnd program\n");
                     //printf("jump:%llu",jump);
-                    printf("End program:%" PRId64 "\n", jump);
+                    //printf("End program:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
@@ -500,7 +505,10 @@ void *scanFlowIpv4TCP(void *valor)
                         //
                         iptTemp = (float)(timestampTemp - timestampPrev);
                         //
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas forward direccion
@@ -561,7 +569,10 @@ void *scanFlowIpv4TCP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion
@@ -702,11 +713,9 @@ void *scanFlowIpv4UDP(void *valor)
                     fPktsPerSecond = (timestampPrev - timestampInit) > 0 && total_fpackets > 0 ? (total_fpackets / (float)(timestampPrev - timestampInit)) : 0;                                   // Number of forward packets per second
                     bPktsPerSecond = total_bpackets > 0 && (timestampPrev - timestampInit) > 0 ? (total_bpackets / (timestampPrev - timestampInit)) : 0;                                          // Number of backward packets per second
                     flowPktsPerSecond = (total_fpackets + total_bpackets) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)) : 0; // Number of flow packets per second
-                    flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0; 
-                    fprintf(csv, "UDP,%f,%d.%d.%d.%d->%d.%d.%d.%d,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
+                    flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0;
+                    fprintf(csv, "UDP,%f,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             timestampInit,
-                            ip_shost >> 24, ((ip_shost >> 16) & 0x0ff), ((ip_shost >> 8) & 0x0ff), ((ip_shost)&0x0ff),
-                            ip_dhost >> 24, ((ip_dhost >> 16) & 0x0ff), ((ip_dhost >> 8) & 0x0ff), ((ip_dhost)&0x0ff),
                             ip_shost >> 24, (ip_shost >> 16) & 0x0ff, (ip_shost >> 8) & 0x0ff, (ip_shost)&0x0ff, ports.srcPort,
                             ip_dhost >> 24, (ip_dhost >> 16) & 0x0ff, (ip_dhost >> 8) & 0x0ff, (ip_dhost)&0x0ff, ports.dstPort,
                             timestampPrev - timestampInit,
@@ -758,9 +767,16 @@ void *scanFlowIpv4UDP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_bpktl / (float)total_fpktl),
-                            isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_UDP));
-                    fprintf(ipts, "\n");
+                            (total_bpktl / (float)total_fpktl));
+                    if (alertT)
+                    {
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                    }
+                    fprintf(csv, "\n");
+                    if (ipts)
+                    {
+                        fprintf(ipts, "\n");
+                    }
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
                     //printf("Timestamp%f\n",timestampInit);
@@ -773,7 +789,7 @@ void *scanFlowIpv4UDP(void *valor)
                     //fin de scaneo de trafico
                     //printf("\nEnd program\n");
                     //printf("jump:%llu",jump);
-                    printf("End program:%" PRId64 "\n", jump);
+                    //printf("End program:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
@@ -872,7 +888,10 @@ void *scanFlowIpv4UDP(void *valor)
                         //
                         iptTemp = timestampTemp - timestampPrev;
                         //
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas forward direccion
@@ -929,7 +948,10 @@ void *scanFlowIpv4UDP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion
@@ -1069,11 +1091,9 @@ void *scanFlowIpv6TCP(void *valor)
                     fPktsPerSecond = (timestampPrev - timestampInit) > 0 && total_fpackets > 0 ? (total_fpackets / (float)(timestampPrev - timestampInit)) : 0;                                   // Number of forward packets per second
                     bPktsPerSecond = total_bpackets > 0 && (timestampPrev - timestampInit) > 0 ? (total_bpackets / (timestampPrev - timestampInit)) : 0;                                          // Number of backward packets per second
                     flowPktsPerSecond = (total_fpackets + total_bpackets) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)) : 0; // Number of flow packets per second
-                    flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0; 
-                    fprintf(csv, "TCP,%f,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
+                    flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0;
+                    fprintf(csv, "TCP,%f,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             timestampInit,
-                            ipv6_SCad.c_str(),
-                            ipv6_DCad.c_str(),
                             ipv6_SCad.c_str(), ports.srcPort,
                             ipv6_DCad.c_str(), ports.dstPort,
                             timestampPrev - timestampInit,
@@ -1125,9 +1145,16 @@ void *scanFlowIpv6TCP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_bpktl / (float)total_fpktl),
-                            isBadTrafic(*socket_to_String(&ipv6_SCad, &ipv6_SCad, &ports), IPV6_TCP));
-                    fprintf(ipts, "\n");
+                            (total_bpktl / (float)total_fpktl));
+                    if (alertT)
+                    {
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                    }
+                    fprintf(csv, "\n");
+                    if (ipts)
+                    {
+                        fprintf(ipts, "\n");
+                    }
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
                     //printf("Timestamp->init: %.20f\n",timestampInit);
@@ -1142,7 +1169,7 @@ void *scanFlowIpv6TCP(void *valor)
                     //fin de scaneo de trafico
                     //printf("\nEnd program\n");
                     //printf("jump:%llu",jump);
-                    printf("End program:%" PRId64 "\n", jump);
+                    //printf("End program:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
@@ -1257,7 +1284,10 @@ void *scanFlowIpv6TCP(void *valor)
                         //
                         iptTemp = timestampTemp - timestampPrev;
                         //
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
@@ -1316,7 +1346,10 @@ void *scanFlowIpv6TCP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion
@@ -1458,10 +1491,8 @@ void *scanFlowIpv6UDP(void *valor)
                     fPktsPerSecond = (timestampPrev - timestampInit) > 0 && total_fpackets > 0 ? (total_fpackets / (float)(timestampPrev - timestampInit)) : 0;                                   // Number of forward packets per second
                     bPktsPerSecond = total_bpackets > 0 && (timestampPrev - timestampInit) > 0 ? (total_bpackets / (timestampPrev - timestampInit)) : 0;                                          // Number of backward packets per second
                     flowPktsPerSecond = (total_fpackets + total_bpackets) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpackets + total_bpackets) / (timestampPrev - timestampInit)) : 0; // Number of flow packets per second
-                    flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0; 
-                    fprintf(csv, "UDP,%s->%s,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f,%d\n",
-                            ipv6_SCad.c_str(),
-                            ipv6_DCad.c_str(),
+                    flowBytesPerSecond = (total_fpktl + total_bpktl) > 0 && (timestampPrev - timestampInit) > 0 ? ((total_fpktl + total_bpktl) / (timestampPrev - timestampInit)) : 0;
+                    fprintf(csv, "UDP,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             ipv6_SCad.c_str(), ports.srcPort,
                             ipv6_DCad.c_str(), ports.dstPort,
                             timestampPrev - timestampInit,
@@ -1513,9 +1544,16 @@ void *scanFlowIpv6UDP(void *valor)
                             flow_urg,
                             flow_cwr,
                             flow_ece,
-                            (total_bpktl / (float)total_fpktl),
-                            isBadTrafic(*socket_to_String(&ipv6_SCad, &ipv6_SCad, &ports), IPV6_UDP));
-                    fprintf(ipts, "\n");
+                            (total_bpktl / (float)total_fpktl));
+                    if (alertT)
+                    {
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                    }
+                    fprintf(csv, "\n");
+                    if (ipts)
+                    {
+                        fprintf(ipts, "\n");
+                    }
                     //printf("srcport:%u",ports.srcPort);
                     //printf("No. packet TCP: %llu\n", TCP_cont);
                     //printf("Timestamp->init: %.20f\n",timestampInit);
@@ -1530,7 +1568,7 @@ void *scanFlowIpv6UDP(void *valor)
                     //fin de scaneo de trafico
                     //printf("\nEnd program\n");
                     //printf("jump:%llu",jump);
-                    printf("End program:%" PRId64 "\n", jump);
+                    //printf("End program:%" PRId64 "\n", jump);
                     resetVar();
                     pthread_mutex_unlock(&mutex); //Fin SC
                     return NULL;
@@ -1641,7 +1679,10 @@ void *scanFlowIpv6UDP(void *valor)
                         //
                         iptTemp = timestampTemp - timestampPrev;
                         //
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
                         //extraccion de caracteristicas forward direccion
                         total_fpackets++;
@@ -1697,7 +1738,10 @@ void *scanFlowIpv6UDP(void *valor)
                         timestampTemp += (*(bffRawTrafic + jump + 7) << 24 | *(bffRawTrafic + jump + 6) << 16 | *(bffRawTrafic + jump + 5) << 8 | *(bffRawTrafic + jump + 4)) / 1e6;
 
                         iptTemp = timestampTemp - timestampPrev;
-                        fprintf(ipts, "%.20f,", iptTemp);
+                        if (ipts)
+                        {
+                            fprintf(ipts, "%.20f,", iptTemp);
+                        }
                         timestampPrev = timestampTemp;
 
                         //extraccion de caracteristicas en backward direccion

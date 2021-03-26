@@ -1,12 +1,5 @@
-//#include <iostream>
-//#include <fstream>
-//#include <stdint.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include "structs.h"
+
 #include "functions.h"
-//#include <type_traits>
-//using namespace std;
 
 char *fileTrafic;
 char *fileFeatures;
@@ -29,20 +22,8 @@ int main(int argc, char **argv)
         fileIpts = *(argv + 4);
         alertT = fopen(alertTrafic, "rb");
         isPcapFile(*alertT);
-        /*
-        fseek(alertT, 0L, SEEK_END);
-        pointerbffAlertTrafic = ftell(alertT) - 24;
-        fseek(alertT, 24L, SEEK_SET);
-        bffAlertTrafic = new unsigned char[pointerbffAlertTrafic];
-        pointerbffAlertTrafic = fread(bffAlertTrafic, sizeof(unsigned char), pointerbffAlertTrafic, alertT);
-        printf("bytes alert trafic: %" PRId64 "\n", pointerbffAlertTrafic);
-        */
         readBadTrafic(*alertT);
-        if (alertT)
-        {
-            printf("alert open\t %lu\n", data.size());
-            fclose(alertT);
-        }
+        printf("alerts:\t%lu\n", data.size());
     }
 
     raw = fopen(fileTrafic, "rb");
@@ -83,7 +64,15 @@ int main(int argc, char **argv)
     pthread_mutex_init(&mutex, NULL);
 
     pthread_mutex_lock(&mutex);
-    fprintf(csv, "%s", titlecolums);
+    if (alertT)
+    {
+        fprintf(csv, "%s", titlecolums_2);
+    }
+    else
+    {
+        fprintf(csv, "%s", titlecolums);
+    }
+
     pthread_mutex_unlock(&mutex);
 
     pthread_create(&hilo0, NULL, scanFlowIpv4TCP, (void *)&u);
@@ -94,7 +83,10 @@ int main(int argc, char **argv)
     pthread_join(hilo1, NULL);
     pthread_join(hilo2, NULL);
     pthread_join(hilo3, NULL);
-
+    if (alertT)
+    {
+        fclose(alertT);
+    }
     fclose(csv);
     fclose(ipts);
     return 0;

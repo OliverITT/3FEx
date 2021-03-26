@@ -4,12 +4,13 @@ all:
 	
 compile:
 	clear
-	g++ 3fex.cpp -o 3fex.x -lpthread
-	g++ tcpv4.cpp -o tcpv4.x -lpthread
-	g++ udpv4.cpp -o udpv4.x -lpthread
-	g++ tcpv6.cpp -o tcpv6.x -lpthread
-	g++ udpv6.cpp -o udpv6.x -lpthread
-	g++ splitTrafic.cpp -o splitTrafic.x
+	sudo su
+	g++ 3fex.cpp -o /usr/bin/3fex.x -lpthread
+	g++ tcpv4.cpp -o /usr/bin/tcpv4.x -lpthread
+	g++ udpv4.cpp -o /usr/bin/udpv4.x -lpthread
+	g++ tcpv6.cpp -o /usr/bin/tcpv6.x -lpthread
+	g++ udpv6.cpp -o /usr/bin/udpv6.x -lpthread
+	g++ splitTrafic.cpp -o /usr/bin/splitTrafic.x
 
 run:
 	#./3fex.x prueba.pcap malo.pcap hola.csv holaipts.txt

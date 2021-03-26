@@ -413,7 +413,8 @@ void *scanFlowIpv4TCP(void *valor)
                 resetVar();
                 if (traficPointer % 1024 == 0)
                 {
-                    printf("Bytes->%" PRId64 "\n", traficPointer);
+                    printf("\rBytes->%" PRId64 "", traficPointer);
+
                 }
                 jump = traficPointer;
                 traficTipe = 0;
@@ -798,7 +799,8 @@ void *scanFlowIpv4UDP(void *valor)
                 resetVar();
                 if (traficPointer % 1024 == 0)
                 {
-                    printf("Bytes->%" PRId64 "\n", traficPointer);
+                    printf("\rBytes->%" PRId64 "", traficPointer);
+
                 }
                 jump = traficPointer;
                 traficTipe = 0;
@@ -1178,7 +1180,8 @@ void *scanFlowIpv6TCP(void *valor)
                 resetVar();
                 if (traficPointer % 1024 == 0)
                 {
-                    printf("Bytes->%" PRId64 "\n", traficPointer);
+                    printf("\rBytes->%" PRId64 "", traficPointer);
+
                 }
                 jump = traficPointer;
                 traficTipe = 0;
@@ -1577,7 +1580,8 @@ void *scanFlowIpv6UDP(void *valor)
                 resetVar();
                 if (traficPointer % 1024 == 0)
                 {
-                    printf("Bytes->%" PRId64 "\n", traficPointer);
+                    printf("\rBytes->%" PRId64 "", traficPointer);
+
                 }
                 jump = traficPointer;
                 traficTipe = 0;

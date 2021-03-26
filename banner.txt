@@ -1,15 +1,19 @@
-                                               
- ad888888b,  88888888888                       
-d8"     "88  88                                
-        a8P  88                                
-     aad8"   88aaaaa   ,adPPYba,  8b,     ,d8  
-     ""Y8,   88"""""  a8P_____88   `Y8, ,8P'   
-        "8b  88       8PP"""""""     )888(     
-Y8,     a88  88       "8b,   ,aa   ,d8" "8b,   
- "Y888888P'  88        `"Ybbd8"'  8P'     `Y8  
-                                               
-
+ ______   ______   ______   __     __     
+/_____/\ /_____/\ /_____/\ /__/\ /__/\    
+\:::_:\ \\::::_\/_\::::_\/_\ \::\\:.\ \   
+   /_\:\ \\:\/___/\\:\/___/\\_\::_\:_\/   
+   \::_:\ \\:::._\/ \::___\/_ _\/__\_\_/\ 
+   /___\:\ '\:\ \    \:\____/\\ \ \ \::\ \
+   \______/  \_\/     \_____\/ \_\/  \__\/
+                                          
+                                         
+                                         
 -r  Input pcap raw file 
 -b  Input pcap alert file 
 -f  Output csv features file
 -i  Output txt inter packet times file
+
+Examples:
+    3fex.x -r ftp-session-134pkts.pcap -b alert.pcap -f hola.csv -i hola.txt
+    3fex.x -r ftp-session-134pkts.pcap -f hola.csv -i hola.txt
+    3fex.x -r ftp-session-134pkts.pcap -f hola.csv

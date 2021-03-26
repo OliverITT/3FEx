@@ -5,7 +5,7 @@ char *fileTrafic;
 char *fileFeatures;
 char *fileIpts;
 char *alertTrafic;
-const char banner[] = "banner.txt";
+const char banner[] = "/usr/bin/banner.txt";
 #define ERROR 1
 void printBanner()
 {

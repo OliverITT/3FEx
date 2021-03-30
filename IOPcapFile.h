@@ -10,7 +10,7 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
         fseek(&FileTrafic, 24L, SEEK_SET);
     }
     packet_pcap = new Packet_pcap;
-
+    uint32_t len_payload = -1;
     if (fread(&packet_pcap->packetHeader, sizeof(PcapPackHeader), 1, &FileTrafic))
     {
         /* code */
@@ -36,8 +36,13 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV4_TCP;
-                packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40)];
-                if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40), &FileTrafic))
+                len_payload = (packet_pcap->packetHeader.incl_len - 14 - 40);
+                if (len_payload == 0)
+                {
+                    break;
+                }
+                packet_pcap->payload = new uint8_t[len_payload];
+                if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
                 {
                     return NULL;
                 }
@@ -48,8 +53,13 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV4_UDP;
-                packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 20 - 8)];
-                if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20 - 8), &FileTrafic))
+                len_payload = (packet_pcap->packetHeader.incl_len - 14 - 20 - 8);
+                if (len_payload == 0)
+                {
+                    break;
+                }
+                packet_pcap->payload = new uint8_t[len_payload];
+                if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
                 {
                     return NULL;
                 }
@@ -57,8 +67,13 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
 
             default:
                 packet_pcap->tipe = IPV4_OTDER_PROTO;
-                packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 20)];
-                if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 20), &FileTrafic))
+                len_payload = (packet_pcap->packetHeader.incl_len - 14 - 20);
+                if (len_payload == 0)
+                {
+                    break;
+                }
+                packet_pcap->payload = new uint8_t[len_payload];
+                if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
                 {
                     return NULL;
                 }
@@ -79,8 +94,12 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV6_TCP;
-                packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40 - 20)];
-                if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40 - 20), &FileTrafic))
+                len_payload = (packet_pcap->packetHeader.incl_len - 14 - 40 - 20);
+                if(len_payload ==0){
+                    break;
+                }
+                packet_pcap->payload = new uint8_t[len_payload];
+                if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
                 {
                     return NULL;
                 }
@@ -91,8 +110,12 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
                     return NULL;
                 }
                 packet_pcap->tipe = IPV6_UDP;
-                packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40 - 8)];
-                if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40 - 8), &FileTrafic))
+                len_payload = (packet_pcap->packetHeader.incl_len - 14 - 40 - 8);
+                if(len_payload ==0){
+                    break;
+                }
+                packet_pcap->payload = new uint8_t[len_payload];
+                if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
                 {
                     return NULL;
                 }
@@ -100,8 +123,12 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
 
             default:
                 packet_pcap->tipe = IPV6_OTDER_PROTO;
-                packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14 - 40)];
-                if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14 - 40), &FileTrafic))
+                len_payload = (packet_pcap->packetHeader.incl_len - 14 - 40);
+                if(len_payload ==0){
+                    break;
+                }
+                packet_pcap->payload = new uint8_t[len_payload];
+                if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
                 {
                     return NULL;
                 }
@@ -110,8 +137,12 @@ void *getNextPacket(FILE &FileTrafic, Packet_pcap *&packet_pcap)
             break;
         default:
             packet_pcap->tipe = OTDER_TRAFIC;
-            packet_pcap->payload = new uint8_t[(packet_pcap->packetHeader.incl_len - 14)];
-            if (!fread(packet_pcap->payload, sizeof(uint8_t), (packet_pcap->packetHeader.incl_len - 14), &FileTrafic))
+            len_payload = (packet_pcap->packetHeader.incl_len - 14);
+            if(len_payload ==0){
+                break;
+            }
+            packet_pcap->payload = new uint8_t[len_payload];
+            if (!fread(packet_pcap->payload, sizeof(uint8_t), len_payload, &FileTrafic))
             {
                 return NULL;
             }

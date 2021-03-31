@@ -30,6 +30,7 @@ void readBadTrafic(FILE &badTrafic)
     while (getNextPacket(badTrafic, packet_pcap))
     {
         data[*packet_pcap->to_string()] = packet_pcap->tipe;
+        data[*packet_pcap->to_stringBackward()] = packet_pcap->tipe;
     }
     delete packet_pcap;
 }

@@ -161,7 +161,7 @@ typedef struct Packet_pcap
     uint8_t *payload;
     std::string *to_string()
     {
-        std::string *ip_proto = new std::string;
+        std::string *ip_proto = new std::string("");
         char buffer[17];
         switch (tipe)
         {
@@ -284,7 +284,7 @@ typedef struct Packet_pcap
     }
         std::string *to_stringBackward()
     {
-        std::string *ip_proto = new std::string;
+        std::string *ip_proto = new std::string("");
         char buffer[17];
         switch (tipe)
         {
@@ -295,7 +295,7 @@ typedef struct Packet_pcap
             sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.srcPort >> 8) | (proto.tcpHeader.srcPort << 8)));
             *ip_proto += buffer;
             sprintf(buffer, "%x", (uint32_t)((ip_layer.ipv4Header.ip_dhost<<24)|((ip_layer.ipv4Header.ip_dhost<<8)& 0xff0000)|((ip_layer.ipv4Header.ip_dhost>>8)& 0xff00)|(ip_layer.ipv4Header.ip_dhost>>24)));
-            *ip_proto = buffer;
+            *ip_proto += buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.dstPort >> 8) | (proto.tcpHeader.dstPort << 8)));
             *ip_proto += buffer;
             // sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_shost), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 24));
@@ -308,7 +308,7 @@ typedef struct Packet_pcap
             sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.srcPort >> 8) | (proto.uDPheader.srcPort << 8)));
             *ip_proto += buffer;
             sprintf(buffer, "%x", (uint32_t)((ip_layer.ipv4Header.ip_dhost<<24)|((ip_layer.ipv4Header.ip_dhost<<8)& 0xff0000)|((ip_layer.ipv4Header.ip_dhost>>8)& 0xff00)|(ip_layer.ipv4Header.ip_dhost>>24)));
-            *ip_proto = buffer;
+            *ip_proto += buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.dstPort >> 8) | (proto.uDPheader.dstPort << 8)));
             *ip_proto += buffer;
             // sprintf(buffer, "%x%x%x%x", (uint8_t)(ip_layer.ipv4Header.ip_shost), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 8), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 16), (uint8_t)(ip_layer.ipv4Header.ip_shost >> 24));
@@ -354,7 +354,7 @@ typedef struct Packet_pcap
                     (uint8_t)(ip_layer.ipv6Header.ip_dhost[13]),
                     (uint8_t)(ip_layer.ipv6Header.ip_dhost[14]),
                     (uint8_t)(ip_layer.ipv6Header.ip_dhost[15]));
-            *ip_proto = buffer;
+            *ip_proto += buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.tcpHeader.dstPort >> 8) | (proto.tcpHeader.dstPort << 8)));
             *ip_proto += buffer;
             break;
@@ -397,7 +397,7 @@ typedef struct Packet_pcap
                     (uint8_t)(ip_layer.ipv6Header.ip_dhost[13]),
                     (uint8_t)(ip_layer.ipv6Header.ip_dhost[14]),
                     (uint8_t)(ip_layer.ipv6Header.ip_dhost[15]));
-            *ip_proto = buffer;
+            *ip_proto += buffer;
             sprintf(buffer, "%x", (uint16_t)((proto.uDPheader.dstPort >> 8) | (proto.uDPheader.dstPort << 8)));
             *ip_proto += buffer;
             break;

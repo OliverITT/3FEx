@@ -12,8 +12,11 @@
 -b  Input pcap alert file 
 -f  Output csv features file
 -i  Output txt inter packet times file
+-u  Input Unified2 snort logs file
 
 Examples:
-    3fex.x -r ftp-session-134pkts.pcap -b alert.pcap -f hola.csv -i hola.txt
-    3fex.x -r ftp-session-134pkts.pcap -f hola.csv -i hola.txt
-    3fex.x -r ftp-session-134pkts.pcap -f hola.csv
+    3fex -r ftp-session-134pkts.pcap -b alert.pcap -f featurs.csv -i times.txt
+    3fex -r ftp-session-134pkts.pcap -f featurs.csv -i times.txt
+    3fex -r ftp-session-134pkts.pcap -f featurs.csv
+    3fex -r ftp-session-134pkts.pcap -f featurs.csv -u snort.log.1617246713
+

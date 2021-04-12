@@ -5,8 +5,8 @@
 #include <inttypes.h>
 #include <math.h>
 #include "scanBadTrafic.h"
-
-FILE *raw, *csv, *ipts, *alertT;
+#include "scanSnortLogs.h"
+FILE *raw, *csv, *ipts, *alertT,*u2_File;
 
 pthread_mutex_t mutex;
 
@@ -387,6 +387,9 @@ void *scanFlowIpv4TCP(void *valor)
                     if (alertT)
                     {
                         fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                    }
+                    if(u2_File){
+                        fprintf(csv,",%d,%d",getPriority(*socket_to_String(&ip_dhost, &ip_shost, &ports),0x6),getClassification(*socket_to_String(&ip_dhost, &ip_shost, &ports),0x6));
                     }
                     fprintf(csv, "\n");
                     if (ipts)
@@ -771,7 +774,10 @@ void *scanFlowIpv4UDP(void *valor)
                             (total_bpktl / (float)total_fpktl));
                     if (alertT)
                     {
-                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_UDP));
+                    }
+                    if(u2_File){
+                        fprintf(csv,",%d,%d",getPriority(*socket_to_String(&ip_dhost, &ip_shost, &ports),0x11),getClassification(*socket_to_String(&ip_dhost, &ip_shost, &ports),0x11));
                     }
                     fprintf(csv, "\n");
                     if (ipts)
@@ -1150,7 +1156,10 @@ void *scanFlowIpv6TCP(void *valor)
                             (total_bpktl / (float)total_fpktl));
                     if (alertT)
                     {
-                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), IPV4_TCP));
+                    }
+                    if(u2_File){
+                        fprintf(csv,",%d,%d",getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports),0x6),getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports),0x6));
                     }
                     fprintf(csv, "\n");
                     if (ipts)
@@ -1548,9 +1557,12 @@ void *scanFlowIpv6UDP(void *valor)
                             flow_cwr,
                             flow_ece,
                             (total_bpktl / (float)total_fpktl));
-                    if (alertT)
+                     if (alertT)
                     {
-                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ip_dhost, &ip_shost, &ports), IPV4_TCP));
+                        fprintf(csv, ",%d", isBadTrafic(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), IPV4_UDP));
+                    }
+                    if(u2_File){
+                        fprintf(csv,",%d,%d",getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports),0x11),getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports),0x11));
                     }
                     fprintf(csv, "\n");
                     if (ipts)
@@ -1581,7 +1593,6 @@ void *scanFlowIpv6UDP(void *valor)
                 if (traficPointer % 1024 == 0)
                 {
                     printf("\rBytes->%" PRId64 "", traficPointer);
-
                 }
                 jump = traficPointer;
                 traficTipe = 0;

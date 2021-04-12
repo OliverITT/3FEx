@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#define __TCP_ 6
-#define __UDP_ 17
+#define __TCP_ 0x6
+#define __UDP_ 0x11
 //Record Type
 enum
 {

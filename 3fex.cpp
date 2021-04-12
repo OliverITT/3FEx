@@ -1,10 +1,7 @@
 
 #include "functions.h"
 
-char *fileTrafic;
-char *fileFeatures;
-char *fileIpts;
-char *alertTrafic;
+
 const char banner[] = "/usr/bin/banner.txt";
 #define ERROR 1
 void printBanner()
@@ -38,7 +35,7 @@ int main(int argc, char **argv)
                 raw = fopen((char *)argv[i + 1], "rb");
                 if (!raw)
                 {
-                    printf("no open file: %s", argv[i + 1]);
+                    printf("no open file: %s\n", argv[i + 1]);
                     return ERROR;
                 }
                 if (!isPcapFile(*raw))
@@ -51,16 +48,21 @@ int main(int argc, char **argv)
                 csv = fopen(argv[i + 1], "w");
                 if (!csv)
                 {
-                    printf("no open file: %s", argv[i + 1]);
+                    printf("no open file: %s\n", argv[i + 1]);
                     return ERROR;
                 }
             }
             if (arg == "-b")
             {
+                if (u2_File)
+                {
+                    printf("only use -u or -b \n");
+                    return ERROR;
+                }
                 alertT = fopen((char *)argv[i + 1], "rb");
                 if (!alertT)
                 {
-                    printf("no open file: %s", argv[i + 1]);
+                    printf("no open file: %s\n", argv[i + 1]);
                     return ERROR;
                 }
                 if (!isPcapFile(*alertT))
@@ -70,12 +72,27 @@ int main(int argc, char **argv)
                 readBadTrafic(*alertT);
                 printf("alerts:\t%lu\n", data.size());
             }
+            if (arg == "-u")
+            {
+                if (alertT)
+                {
+                    printf("only use -u or -b \n");
+                    return ERROR;
+                }
+                u2_File = fopen(argv[i + 1], "rb");
+                if (!u2_File)
+                {
+                    printf("no open file: %s\n", argv[i + 1]);
+                    return ERROR;
+                }
+                readSnortLogs(*u2_File);
+            }
             if (arg == "-i")
             {
                 ipts = fopen(argv[i + 1], "w");
                 if (!ipts)
                 {
-                    printf("no open file: %s", argv[i + 1]);
+                    printf("no open file: %s\n", argv[i + 1]);
                     return ERROR;
                 }
             }
@@ -103,6 +120,10 @@ int main(int argc, char **argv)
     if (alertT)
     {
         fprintf(csv, "%s", titlecolums_2);
+    }
+    if (u2_File)
+    {
+        fprintf(csv, "%s", titlecolums_3);
     }
     else
     {

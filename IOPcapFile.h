@@ -226,7 +226,7 @@ bool isPcapFile(FILE &FilePcap)
     readHeaderPcapFile(FilePcap, pcapFileHeader);
     if (!(pcapFileHeader->version_major == 2 && pcapFileHeader->version_minor == 4))
     {
-        printf("unknown file format\n");
+        printf("unknown file format pcap\n");
         delete pcapFileHeader;
         return false;
     }

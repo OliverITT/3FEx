@@ -1,8 +1,8 @@
 
 #include "functions.h"
 
-
-const char banner[] = "/usr/bin/banner.txt";
+// const char banner[] = "/usr/bin/banner.txt";
+const char banner[] = "banner.txt";
 #define ERROR 1
 void printBanner()
 {
@@ -33,6 +33,7 @@ int main(int argc, char **argv)
             if (arg == "-r")
             {
                 raw = fopen((char *)argv[i + 1], "rb");
+                nameImage = argv[i + 1];
                 if (!raw)
                 {
                     printf("no open file: %s\n", argv[i + 1]);
@@ -96,6 +97,10 @@ int main(int argc, char **argv)
                     return ERROR;
                 }
             }
+            if (arg == "-o")
+            {
+                flowsPerImage = std::stoi(argv[i + 1]);
+            }
         }
     }
     /*scan*/
@@ -154,5 +159,6 @@ int main(int argc, char **argv)
     {
         fclose(ipts);
     }
+    saveImage();
     return 0;
 }

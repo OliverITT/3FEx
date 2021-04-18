@@ -13,6 +13,8 @@
 -f  Output csv features file
 -i  Output txt inter packet times file
 -u  Input Unified2 snort logs file
+-o  Flow per image
+
 
 Examples:
     3fex -r ftp-session-134pkts.pcap -b alert.pcap -f featurs.csv -i times.txt

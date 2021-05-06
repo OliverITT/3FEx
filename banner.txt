@@ -9,11 +9,11 @@
                                          
                                          
 -r  Input pcap raw file 
--b  Input pcap alert file 
+-b  Input pcap alert: label wit base pcap file
 -f  Output csv features file
 -i  Output txt inter packet times file
--u  Input Unified2 snort logs file
--o  Flow per image
+-u  Input Unified2 snort logs file: label and classification wit base Unified2 file
+-o  Flow per image: Output image wit flows per image
 
 
 Examples:
@@ -21,4 +21,7 @@ Examples:
     3fex -r ftp-session-134pkts.pcap -f featurs.csv -i times.txt
     3fex -r ftp-session-134pkts.pcap -f featurs.csv
     3fex -r ftp-session-134pkts.pcap -f featurs.csv -u snort.log.1617246713
+    3fex -r traza_original.pcap -f traza_original.csv -o 8 
+    3fex -r traza_original.pcap -f traza_original.csv -i ipts.txt -o 8 -u snort.log.1617246713 
+    
 

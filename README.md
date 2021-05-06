@@ -17,15 +17,15 @@ this tool extrac features the pcap file
 <br>
 -r  Input pcap raw file 
 <br>
--b  Input pcap alert file 
+-b  Input pcap alert file: binari 1 = alert, 0 = no alert, label wit base pcap file
 <br>
 -f  Output csv features file
 <br>
 -i  Output txt inter packet times file
 <br>
--u  Input Unified2 snort logs file
+-u  Input Unified2 snort logs file: label and classification wit base Unified2 file
 <br>
--o  Flow per image
+-o  Flow per image: Output image wit flows per image 
 </p>
 
 <h2>Examples</h2>
@@ -33,5 +33,7 @@ this tool extrac features the pcap file
     3fex -r ftp-session-134pkts.pcap -b alert.pcap -f featurs.csv -i times.txt <br>
     3fex -r ftp-session-134pkts.pcap -f featurs.csv -i times.txt <br>
     3fex -r ftp-session-134pkts.pcap -f featurs.csv<br>
-    3fex -r ftp-session-134pkts.pcap -f featurs.csv -u snort.log.1617246713
+    3fex -r ftp-session-134pkts.pcap -f featurs.csv -u snort.log.1617246713 <br>
+    3fex -r traza_original.pcap -f traza_original.csv -o 8 <br>
+    3fex -r traza_original.pcap -f traza_original.csv -i ipts.txt -o 8 -u snort.log.1617246713 
 </p>

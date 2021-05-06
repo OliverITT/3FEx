@@ -1,8 +1,8 @@
 
 #include "functions.h"
 
-// const char banner[] = "/usr/bin/banner.txt";
-const char banner[] = "banner.txt";
+const char banner[] = "/usr/bin/banner.txt";
+//const char banner[] = "banner.txt";
 #define ERROR 1
 void printBanner()
 {

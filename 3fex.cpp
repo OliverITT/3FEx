@@ -46,6 +46,12 @@ int main(int argc, char **argv)
             }
             if (arg == "-f")
             {
+                csv = fopen(argv[i + 1], "r");
+                if(csv){
+                    printf("-f File exists: %s\n", argv[i + 1]);
+                    fclose(csv);
+                    return ERROR;
+                }
                 csv = fopen(argv[i + 1], "w");
                 if (!csv)
                 {
@@ -90,6 +96,12 @@ int main(int argc, char **argv)
             }
             if (arg == "-i")
             {
+                ipts = fopen(argv[i + 1], "r");
+                if(ipts){
+                    printf("-i File exists: %s\n", argv[i + 1]);
+                    fclose(ipts);
+                    return ERROR;
+                }
                 ipts = fopen(argv[i + 1], "w");
                 if (!ipts)
                 {

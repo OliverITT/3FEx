@@ -73,8 +73,8 @@ public:
 
 Flow::Flow(/* args */)
 {
-    this->protocol = -1;  //layer prococol
-    this->timestamp = -1; //timestamp
+    this->protocol = 0;  //layer prococol
+    this->timestamp = 0; //timestamp
     //ipv4
     this->ip_shost = 0; //
     this->ip_dhost = 0; //
@@ -129,9 +129,9 @@ Flow::Flow(/* args */)
     this->flow_urg = 0;           // Number of packets with URG
     this->flow_cwr = 0;           // Number of packets with CWE
     this->flow_ece = 0;           // Number of packets with ECE
-    this->downUpRation = -1;
-    this->priority = -1;
-    this->classification = -1;
+    this->downUpRation = 0;
+    this->priority = 0;
+    this->classification = 0;
 }
 
 Flow::~Flow()

@@ -8,6 +8,7 @@ Mat img;
 Flow *flow;
 char *nameImage;
 uint32_t flowsPerImage = 0;
+bool noips = true;
 uint32_t countFlows = 0;
 uint32_t outimg =0;
 void saveImage()
@@ -21,19 +22,27 @@ void saveImage()
 }
 void addFlowToImage()
 {
-    uint8_t data[320];
-
-    for (int i = 0; i < sizeof(Flow); i++)
+    uint16_t size_image_bytes=320;
+    if(!noips){
+        size_image_bytes -= 40;
+    }
+    uint8_t data[size_image_bytes];
+    
+    for (int i=0,e = 0; i+e < sizeof(Flow); i++)
     {
-        data[i] = ((char *)*&flow)[i];
+        if(!noips && i == 5){
+            e = 45;
+        }else{
+            data[i] = ((char *)*&flow)[i+e];
+        }
     }
     if (!countFlows)
     {
-        img = Mat(1, 320, CV_8U, data);
+        img = Mat(1, size_image_bytes, CV_8U, data);
     }
     else
     {
-        img.push_back(Mat(1, 320, CV_8U, data));
+        img.push_back(Mat(1, size_image_bytes, CV_8U, data));
     }
     countFlows++;
     if(countFlows == flowsPerImage){

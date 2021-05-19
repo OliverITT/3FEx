@@ -113,6 +113,10 @@ int main(int argc, char **argv)
             {
                 flowsPerImage = std::stoi(argv[i + 1]);
             }
+            if (arg == "-noips")
+            {
+                noips = false;
+            }
         }
     }
     /*scan*/

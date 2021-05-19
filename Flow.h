@@ -11,11 +11,12 @@ public:
     //ipv4
     uint32_t ip_shost; //
     uint32_t ip_dhost; //
-    uint16_t srcPort;  // source port
-    uint16_t dstPort;  // destination port
     //ipv6
     __uint128_t ipv6_shost; // ip v6 source
     __uint128_t ipv6_dhost; // ip v6 destination
+    uint16_t srcPort;  // source port
+    uint16_t dstPort;  // destination port
+
     double fduration;       // Duration of the flow in Microsecond
     //flow
     uint64_t total_fpackets;  // = 0; // Total packets in the forward direction

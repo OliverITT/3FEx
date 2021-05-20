@@ -399,7 +399,9 @@ void *scanFlowIpv4TCP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
                         flow->priority = priority <= inputPriority ?  priority : 0; 
-                        flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
+                        if(flow->priority){
+                            flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
+                        }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
                     fprintf(csv, "\n");
@@ -803,7 +805,9 @@ void *scanFlowIpv4UDP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
                         flow->priority = priority <= inputPriority ? priority : 0;
-                        flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
+                        if(flow->priority){
+                            flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
+                        }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
                     fprintf(csv, "\n");
@@ -1201,7 +1205,9 @@ void *scanFlowIpv6TCP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
                         flow->priority = priority <= inputPriority ? priority : 0;
-                        flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
+                        if(flow->priority){
+                            flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
+                        }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
                     fprintf(csv, "\n");
@@ -1620,7 +1626,9 @@ void *scanFlowIpv6UDP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
                         flow->priority = priority <= inputPriority ? priority : 0;
-                        flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
+                        if(flow->priority){
+                            flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
+                        }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
                     fprintf(csv, "\n");

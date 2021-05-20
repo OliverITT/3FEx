@@ -117,6 +117,10 @@ int main(int argc, char **argv)
             {
                 noips = false;
             }
+            if (arg == "-p")
+            {
+                inputPriority = std::stoi(argv[i + 1]);
+            }
         }
     }
     /*scan*/

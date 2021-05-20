@@ -9,7 +9,7 @@
 #include "FlowToImage.h"
 
 FILE *raw, *csv, *ipts, *alertT, *u2_File;
-
+uint8_t inputPriority= -1;
 pthread_mutex_t mutex;
 
 std::string *socket_to_String(std::string *ip_dhost, std::string *ip_shost, TCPheader *ports)
@@ -397,7 +397,8 @@ void *scanFlowIpv4TCP(void *valor)
                     }
                     if (u2_File)
                     {
-                        flow->priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
+                        int priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
+                        flow->priority = priority <= inputPriority ?  priority : 0; 
                         flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
@@ -800,7 +801,8 @@ void *scanFlowIpv4UDP(void *valor)
                     }
                     if (u2_File)
                     {
-                        flow->priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
+                        int priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
+                        flow->priority = priority <= inputPriority ? priority : 0;
                         flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
@@ -1197,7 +1199,8 @@ void *scanFlowIpv6TCP(void *valor)
                     }
                     if (u2_File)
                     {
-                        flow->priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
+                        int priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
+                        flow->priority = priority <= inputPriority ? priority : 0;
                         flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }
@@ -1615,7 +1618,8 @@ void *scanFlowIpv6UDP(void *valor)
                     }
                     if (u2_File)
                     {
-                        flow->priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
+                        int priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
+                        flow->priority = priority <= inputPriority ? priority : 0;
                         flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
                     }

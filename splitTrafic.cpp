@@ -5,9 +5,9 @@ const char banner[] = {"-r  Input pcap raw file\n-b  Input pcap alert file, no u
 int main(int argc, char **argv)
 {
     FILE *rawTrafic;         // = fopen(argv[1], "rb");
-    FILE *badTrafic;         // = fopen(argv[2], "rb");
+    FILE *badTrafic = NULL;         // = fopen(argv[2], "rb");
     FILE *freeAnomaliTrafic; // = fopen(argv[3], "wb");
-    FILE *u2Event;
+    FILE *u2Event = NULL;
     uint32_t priority = -1;
     if (argc < 7)
     {
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
             {
                 if (u2Event)
                 {
-                    printf("only use -u or -b \n");
+                    printf("-b only use -u or -b \n");
                     return ERROR;
                 }
                 badTrafic = fopen((char *)argv[i + 1], "rb");
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
             {
                 if (badTrafic)
                 {
-                    printf("only use -u or -b \n");
+                    printf("-u only use -u or -b \n");
                     return ERROR;
                 }
                 u2Event = fopen((char *)argv[i + 1], "rb");

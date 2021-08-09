@@ -16,6 +16,7 @@
 -o  Flow per image: Output image wit flows per image
 -noips  No include ips in output image 
 -p input priority for compare label 
+-sips split ip's bytes per colum s1,s2,s3,s4,d1,d2,d3,d4. only use whit trafic ipv4 
 
 Examples:
     3fex -r ftp-session-134pkts.pcap -b alert.pcap -f featurs.csv -i times.txt
@@ -25,5 +26,6 @@ Examples:
     3fex -r traza_original.pcap -f traza_original.csv -o 8 
     3fex -r traza_original.pcap -f traza_original.csv -i ipts.txt -o 8 -u snort.log.1617246713 
     3fex -r traza_original.pcap -f traza_original.csv -o 8 -noips
-    3fex -r traza_original.pcap -f traza_original.csv -p 2    
+    3fex -r traza_original.pcap -f traza_original.csv -p 2 
+    3fex -r traza_original.pcap -f traza_original.csv -sips
 

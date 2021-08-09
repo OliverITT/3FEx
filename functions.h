@@ -9,8 +9,10 @@
 #include "FlowToImage.h"
 
 FILE *raw, *csv, *ipts, *alertT, *u2_File;
-uint8_t inputPriority= -1;
+uint8_t inputPriority = -1;
 pthread_mutex_t mutex;
+/*flag split ip's bytes per colum*/
+bool sips = false;
 
 std::string *socket_to_String(std::string *ip_dhost, std::string *ip_shost, TCPheader *ports)
 {
@@ -335,10 +337,20 @@ void *scanFlowIpv4TCP(void *valor)
                     flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
                     flow->flowBytesPerSecond = (flow->total_fpktl + flow->total_bpktl) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpktl + flow->total_bpktl) / (timestampPrev - flow->timestamp)) : 0;            // Number of flow bytes per second*
                     flow->downUpRation = (flow->total_bpktl / (float)flow->total_fpktl);
-                    fprintf(csv, "TCP,%f,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
-                            flow->timestamp,
-                            flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
-                            flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort,
+                    fprintf(csv, "TCP,%f,", flow->timestamp);
+                    if (sips)
+                    {
+                        fprintf(csv, "%d,%d,%d,%d,%u,%d,%d,%d,%d,%u,",
+                                flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
+                                flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort);
+                    }
+                    else
+                    {
+                        fprintf(csv, "%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,",
+                                flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
+                                flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort);
+                    }
+                    fprintf(csv, "%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             flow->fduration,
                             flow->total_fpackets,
                             flow->total_bpackets,
@@ -398,8 +410,9 @@ void *scanFlowIpv4TCP(void *valor)
                     if (u2_File)
                     {
                         int priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
-                        flow->priority = priority <= inputPriority ?  priority : 0; 
-                        if(flow->priority){
+                        flow->priority = priority <= inputPriority ? priority : 0;
+                        if (flow->priority)
+                        {
                             flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x6);
                         }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
@@ -742,10 +755,20 @@ void *scanFlowIpv4UDP(void *valor)
                     flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
                     flow->flowBytesPerSecond = (flow->total_fpktl + flow->total_bpktl) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpktl + flow->total_bpktl) / (timestampPrev - flow->timestamp)) : 0;
                     flow->downUpRation = (flow->total_bpktl / (float)flow->total_fpktl);
-                    fprintf(csv, "UDP,%f,%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
-                            flow->timestamp,
-                            flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
-                            flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort,
+                    fprintf(csv, "UDP,%f,", flow->timestamp);
+                    if (sips)
+                    {
+                        fprintf(csv, "%d,%d,%d,%d,%u,%d,%d,%d,%d,%u,",
+                                flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
+                                flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort);
+                    }
+                    else
+                    {
+                        fprintf(csv, "%d.%d.%d.%d,%u,%d.%d.%d.%d,%u,",
+                                flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
+                                flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort);
+                    }
+                    fprintf(csv, "%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             flow->fduration,
                             flow->total_fpackets,
                             flow->total_bpackets,
@@ -805,7 +828,8 @@ void *scanFlowIpv4UDP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
                         flow->priority = priority <= inputPriority ? priority : 0;
-                        if(flow->priority){
+                        if (flow->priority)
+                        {
                             flow->classification = getClassification(*socket_to_String(&flow->ip_dhost, &flow->ip_shost, &ports), 0x11);
                         }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
@@ -1205,7 +1229,8 @@ void *scanFlowIpv6TCP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
                         flow->priority = priority <= inputPriority ? priority : 0;
-                        if(flow->priority){
+                        if (flow->priority)
+                        {
                             flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x6);
                         }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);
@@ -1626,7 +1651,8 @@ void *scanFlowIpv6UDP(void *valor)
                     {
                         int priority = getPriority(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
                         flow->priority = priority <= inputPriority ? priority : 0;
-                        if(flow->priority){
+                        if (flow->priority)
+                        {
                             flow->classification = getClassification(*socket_to_String(&ipv6_DCad, &ipv6_SCad, &ports), 0x11);
                         }
                         fprintf(csv, ",%d,%d", flow->priority, flow->classification);

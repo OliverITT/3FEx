@@ -47,7 +47,8 @@ int main(int argc, char **argv)
             if (arg == "-f")
             {
                 csv = fopen(argv[i + 1], "r");
-                if(csv){
+                if (csv)
+                {
                     printf("-f File exists: %s\n", argv[i + 1]);
                     fclose(csv);
                     return ERROR;
@@ -97,7 +98,8 @@ int main(int argc, char **argv)
             if (arg == "-i")
             {
                 ipts = fopen(argv[i + 1], "r");
-                if(ipts){
+                if (ipts)
+                {
                     printf("-i File exists: %s\n", argv[i + 1]);
                     fclose(ipts);
                     return ERROR;
@@ -121,6 +123,10 @@ int main(int argc, char **argv)
             {
                 inputPriority = std::stoi(argv[i + 1]);
             }
+            if (arg == "-sips")
+            {
+                sips = true;
+            }
         }
     }
     /*scan*/
@@ -142,6 +148,14 @@ int main(int argc, char **argv)
     pthread_mutex_init(&mutex, NULL);
 
     pthread_mutex_lock(&mutex);
+    if (sips)
+    {
+        fprintf(csv, "%s", headerTitleColums_2);
+    }
+    else
+    {
+        fprintf(csv, "%s", headerTitleColums);
+    }
     if (alertT)
     {
         fprintf(csv, "%s", titlecolums_2);
@@ -163,12 +177,16 @@ int main(int argc, char **argv)
 
     pthread_create(&hilo0, NULL, scanFlowIpv4TCP, (void *)&u);
     pthread_create(&hilo1, NULL, scanFlowIpv4UDP, (void *)&p);
-    pthread_create(&hilo2, NULL, scanFlowIpv6TCP, (void *)&o);
-    pthread_create(&hilo3, NULL, scanFlowIpv6UDP, (void *)&r);
     pthread_join(hilo0, NULL);
     pthread_join(hilo1, NULL);
-    pthread_join(hilo2, NULL);
-    pthread_join(hilo3, NULL);
+
+    if (!sips)
+    {
+        pthread_create(&hilo2, NULL, scanFlowIpv6TCP, (void *)&o);
+        pthread_create(&hilo3, NULL, scanFlowIpv6UDP, (void *)&r);
+        pthread_join(hilo2, NULL);
+        pthread_join(hilo3, NULL);
+    }
 
     /*close file*/
     if (csv)

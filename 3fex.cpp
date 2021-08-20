@@ -160,14 +160,18 @@ int main(int argc, char **argv)
     {
         fprintf(csv, "%s", titlecolums_2);
     }
-    if (u2_File)
-    {
-        fprintf(csv, "%s", titlecolums_3);
-    }
     else
     {
-        fprintf(csv, "%s", titlecolums);
+        if (u2_File)
+        {
+            fprintf(csv, "%s", titlecolums_3);
+        }
+        else
+        {
+            fprintf(csv, "%s", titlecolums);
+        }
     }
+
     if (alertT)
     {
         fclose(alertT);

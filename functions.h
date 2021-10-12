@@ -334,7 +334,7 @@ void *scanFlowIpv4TCP(void *valor)
 
                     flow->fPktsPerSecond = (timestampPrev - flow->timestamp) > 0 && flow->total_fpackets > 0 ? (flow->total_fpackets / (float)(timestampPrev - flow->timestamp)) : 0;                                               // Number of forward packets per second
                     flow->bPktsPerSecond = flow->total_bpackets > 0 && (timestampPrev - flow->timestamp) > 0 ? (flow->total_bpackets / (timestampPrev - flow->timestamp)) : 0;                                                      // Number of backward packets per second
-                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
+//                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
                     flow->flowBytesPerSecond = (flow->total_fpktl + flow->total_bpktl) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpktl + flow->total_bpktl) / (timestampPrev - flow->timestamp)) : 0;            // Number of flow bytes per second*
                     flow->downUpRation = (flow->total_bpktl / (float)flow->total_fpktl);
                     fprintf(csv, "TCP,%f,", flow->timestamp);
@@ -350,7 +350,7 @@ void *scanFlowIpv4TCP(void *valor)
                                 flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
                                 flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort);
                     }
-                    fprintf(csv, "%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
+                    fprintf(csv, "%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             flow->fduration,
                             flow->total_fpackets,
                             flow->total_bpackets,
@@ -382,7 +382,7 @@ void *scanFlowIpv4TCP(void *valor)
                             flow->total_bhlen,
                             flow->fPktsPerSecond,
                             flow->bPktsPerSecond,
-                            flow->flowPktsPerSecond,
+//                            flow->flowPktsPerSecond,
                             flow->flowBytesPerSecond,
                             // min_flowpktl,
                             // max_flowpktl,
@@ -752,7 +752,7 @@ void *scanFlowIpv4UDP(void *valor)
 
                     flow->fPktsPerSecond = (timestampPrev - flow->timestamp) > 0 && flow->total_fpackets > 0 ? (flow->total_fpackets / (float)(timestampPrev - flow->timestamp)) : 0;                                               // Number of forward packets per second
                     flow->bPktsPerSecond = flow->total_bpackets > 0 && (timestampPrev - flow->timestamp) > 0 ? (flow->total_bpackets / (timestampPrev - flow->timestamp)) : 0;                                                      // Number of backward packets per second
-                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
+//                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
                     flow->flowBytesPerSecond = (flow->total_fpktl + flow->total_bpktl) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpktl + flow->total_bpktl) / (timestampPrev - flow->timestamp)) : 0;
                     flow->downUpRation = (flow->total_bpktl / (float)flow->total_fpktl);
                     fprintf(csv, "UDP,%f,", flow->timestamp);
@@ -768,7 +768,7 @@ void *scanFlowIpv4UDP(void *valor)
                                 flow->ip_shost >> 24, (flow->ip_shost >> 16) & 0x0ff, (flow->ip_shost >> 8) & 0x0ff, (flow->ip_shost) & 0x0ff, ports.srcPort,
                                 flow->ip_dhost >> 24, (flow->ip_dhost >> 16) & 0x0ff, (flow->ip_dhost >> 8) & 0x0ff, (flow->ip_dhost) & 0x0ff, ports.dstPort);
                     }
-                    fprintf(csv, "%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
+                    fprintf(csv, "%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             flow->fduration,
                             flow->total_fpackets,
                             flow->total_bpackets,
@@ -800,7 +800,7 @@ void *scanFlowIpv4UDP(void *valor)
                             flow->total_bhlen,
                             flow->fPktsPerSecond,
                             flow->bPktsPerSecond,
-                            flow->flowPktsPerSecond,
+//                            flow->flowPktsPerSecond,
                             flow->flowBytesPerSecond,
                             // min_flowpktl,
                             // max_flowpktl,
@@ -1163,10 +1163,10 @@ void *scanFlowIpv6TCP(void *valor)
 
                     flow->fPktsPerSecond = (timestampPrev - flow->timestamp) > 0 && flow->total_fpackets > 0 ? (flow->total_fpackets / (float)(timestampPrev - flow->timestamp)) : 0;                                               // Number of forward packets per second
                     flow->bPktsPerSecond = flow->total_bpackets > 0 && (timestampPrev - flow->timestamp) > 0 ? (flow->total_bpackets / (timestampPrev - flow->timestamp)) : 0;                                                      // Number of backward packets per second
-                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
+//                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
                     flow->flowBytesPerSecond = (flow->total_fpktl + flow->total_bpktl) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpktl + flow->total_bpktl) / (timestampPrev - flow->timestamp)) : 0;
                     flow->downUpRation = (flow->total_bpktl / (float)flow->total_fpktl);
-                    fprintf(csv, "TCP,%f,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
+                    fprintf(csv, "TCP,%f,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             flow->timestamp,
                             ipv6_SCad.c_str(), ports.srcPort,
                             ipv6_DCad.c_str(), ports.dstPort,
@@ -1201,7 +1201,7 @@ void *scanFlowIpv6TCP(void *valor)
                             flow->total_bhlen,
                             flow->fPktsPerSecond,
                             flow->bPktsPerSecond,
-                            flow->flowPktsPerSecond,
+//                            flow->flowPktsPerSecond,
                             flow->flowBytesPerSecond,
                             // min_flowpktl,
                             // max_flowpktl,
@@ -1586,10 +1586,10 @@ void *scanFlowIpv6UDP(void *valor)
 
                     flow->fPktsPerSecond = (timestampPrev - flow->timestamp) > 0 && flow->total_fpackets > 0 ? (flow->total_fpackets / (float)(timestampPrev - flow->timestamp)) : 0;                                               // Number of forward packets per second
                     flow->bPktsPerSecond = flow->total_bpackets > 0 && (timestampPrev - flow->timestamp) > 0 ? (flow->total_bpackets / (timestampPrev - flow->timestamp)) : 0;                                                      // Number of backward packets per second
-                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
+//                    flow->flowPktsPerSecond = (flow->total_fpackets + flow->total_bpackets) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpackets + flow->total_bpackets) / (timestampPrev - flow->timestamp)) : 0; // Number of flow packets per second
                     flow->flowBytesPerSecond = (flow->total_fpktl + flow->total_bpktl) > 0 && (timestampPrev - flow->timestamp) > 0 ? ((flow->total_fpktl + flow->total_bpktl) / (timestampPrev - flow->timestamp)) : 0;
                     flow->downUpRation = (flow->total_bpktl / (float)flow->total_fpktl);
-                    fprintf(csv, "UDP,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
+                    fprintf(csv, "UDP,%s,%u,%s,%u,%f,%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%f",
                             ipv6_SCad.c_str(), ports.srcPort,
                             ipv6_DCad.c_str(), ports.dstPort,
                             flow->fduration,
@@ -1623,7 +1623,7 @@ void *scanFlowIpv6UDP(void *valor)
                             flow->total_bhlen,
                             flow->fPktsPerSecond,
                             flow->bPktsPerSecond,
-                            flow->flowPktsPerSecond,
+//                            flow->flowPktsPerSecond,
                             flow->flowBytesPerSecond,
                             // min_flowpktl,
                             // max_flowpktl,
